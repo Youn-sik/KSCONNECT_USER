@@ -203,6 +203,7 @@ router.post("/user/update", (request, response)=> {
     let ver = request.ver //*프로토콜 버전 (ex: v100)
     let spid = request.spid //*회원사 ID (ex: KPC, HEC)
 
+    let spkey = request.body.spkey //*회원사 연계키 (ex: KRKPCxx..xx)
     // let list = request.body.list //*정산대상정보 LIST (ex: )
     // let spid = request.body.spid //*회원사ID (ex: KPC, HEC)
     let trade_spid = request.body.trade_spid //*충전거래 사업자ID (ex: KPC, HEC)
@@ -236,6 +237,7 @@ router.post("/user/update", (request, response)=> {
     let calc_status_cd = request.body.calc_status_cd //*정산진행상태 (ex: 코드참조)
 
     let req_data = {
+        "spkey": spkey,
         "list": {
             "spid": spid,
             "trade_spid": trade_spid,
@@ -879,6 +881,7 @@ router.post("/pay/update", (request, response)=> {
     let ver = request.ver //*프로토콜 버전 (ex: v100)
     let spid = request.spid //*회원사 ID (ex: KPC, HEC)
 
+    let spkey = request.body.spkey //*회원사 연계키 (ex: KRKPCxx..xx)
     // let list = request.body.list //*결제내역정보 LIST (ex: )
     // let spid = request.body.spid //*회원사ID (ex: KPC, HEC)
     let trade_spid = request.body.trade_spid //*충전거래 사업자ID (ex: KPC, HEC)
@@ -894,6 +897,7 @@ router.post("/pay/update", (request, response)=> {
     let recp_ymd = request.body.recp_ymd //납부일자 (ex: 20200910)
 
     let req_data = {
+        "spkey": spkey,
         "list": {
             "spid": spid,
             "trade_spid": trade_spid,
@@ -1026,5 +1030,285 @@ router.post("/pay/update", (request, response)=> {
         })
 })
 
+// 7. 로밍 계약내역 조회
+router.post("/cntr/info", (request, response)=> {
+    let ver = request.ver //*프로토콜 버전 (ex: v100)
+    let spid = request.spid //*회원사 ID (ex: KPC, HEC)
+
+    let spkey = request.body.spkey //*회원사 연계키 (ex: KRKPCxx..xx)
+    let provider_id = request.body.provider_id //*조회 회원사 (ex: HEC, CVC)
+    let fromdate = request.body.fromdate //계약내역 조회시작일시 (ex: 20200820135000)
+    let todate = request.body.todate //계약내역 조회종료일시 (ex: 20200820135000)
+    let period = request.body.period //최근 갱신시간(분) (ex: 30, 60, all(전체))
+
+    let req_data = {
+        "spkey": spkey,
+        "provider_id": provider_id,
+        "fromdate": fromdate,
+        "todate": todate,
+        "period": period,
+    }
+
+    axios.post(`${kepco_host}:${kepco_port}/evapi/v${ver}/${spid}/cntr/info`, JSON.stringify(req_data), header_json)
+        .then(res=> {
+            //응답결과(result) 코드내역
+            let result = res.body.result //*응답결과(result) 내역 (ex: 응답결과(result) 내역 참조)
+            let errcode = res.body.errcode //*에러코드
+            let snd_cnt = res.body.snd_cnt //*등록요청 건수(등록/수정시)
+            let nor_cnt = res.body.nor_cnt //*정상처리 건수
+            let rcv_cnt = res.body.rcv_cnt //*요청수신 건수(조회시)
+            let ins_cnt = res.body.ins_cnt //*신규등록 건수(등록/수정시)
+            let upd_cnt = res.body.upd_cnt //*변경등록 건수(등록/수정시)
+            let err_cnt = res.body.err_cnt //*에러처리 건수
+            let datetime = res.body.datetime //*처리기준 일시
+            let errlist = res.body.errlist //*에러내역 리스트(등록/수정 오류분 errtList)
+            let resultmsg = res.body.resultmsg //*에러내용
+
+            //처리 결과
+            if(result == 0 || result == 1) {
+                //응답데이터(List)
+                let list = res.body.list //*충전기정보List (ex: )
+                list.forEach(element, index => {
+                    let spid = element.spid //*회원사ID (ex: KPC, HEC)
+                    let trade_spid = element.trade_spid //*충전거래 사업자ID (ex: KPC, HEC)
+                    let platform_spid = element.platform_spid //*로밍플랫폼 연계기관ID (ex: KPC(한전) MEC(환경부))
+                    let cntr_reg_date = element.cntr_reg_date //*로밍계약 등록일시 (ex: 20200820135000)
+                    let cntr_cfm_date = element.cntr_cfm_date //로밍계약 승인완료일시 (ex: 20200820135000)
+                    let cntr_status_cd = element.cntr_status_cd //*로밍계약 진행단계 (ex: Y(완료) N(진행중))
+                    let cntr_st_date = element.cntr_st_date //*로밍계약 시작일시 (ex: 20200820135000)
+                    let cntr_end_date = element.cntr_end_date //*로밍계약 종료일시 (ex: 20200820135000)
+                    let sp_calc_ucost = element.sp_calc_ucost //*회원사 충전기 정산단가 (ex: 360.20)
+                    let sp_charge_ucost = element.sp_charge_ucost //*회원사 충전기 회원충전단가 (ex: 450.20)
+                    let tsp_calc_ucost = element.tsp_calc_ucost //*계약사 충전기 정산단가 (ex: 360.20)
+                    let tsp_charge_ucost = element.tsp_charge_ucost //*계약사 충전기 회원충전단가 (ex: 470.30)
+
+                    //처리 결과
+                    if(result == 1) { //요청처리 일부 정상완료
+                        console.error("====error====")
+                        console.error("요청처리 일부 정상완료")
+                        console.error("errcode: ", errcode)
+                        if(errcode == 100) {
+                            console.error("--시스템 오류--")
+                            console.error("시스템 에러")
+                        } else if(errcode == 200) {
+                            console.error("--구문 오류--")
+                            console.error("요청형식 오류, 필수항목 누락")
+                        } else if(errcode == 300) {
+                            console.error("--검증 오류--")
+                            console.error("데이터 오류")
+                        } else if(errcode == 400) {
+                            console.error("--코드값 오류--")
+                            console.error("코드정의 오류")
+                        } else if(errcode == 500) {
+                            console.error("--데이터형식 오류--")
+                            console.error("데이터 형식/속성 오류")
+                        } else if(errcode == 600) {
+                            console.error("--데이터 없음--")
+                            console.error("조회/처리 데이터 없음")
+                        }
+                        console.error("오류분 errlist 확인")
+                        console.error("errlist: ", errlist)
+                        console.error("=============")
+                        //각 결과(list) 처리 로직
+
+                        response.json({"result": false, "errStr": "요청처리 일부 정상완료"})
+                    } else { //정상
+                        if(errcode == "") { //처리결과 오류가 없는 경우(errcode = "")
+                            //각 결과(list) 처리 로직
+                            
+                            response.json({"result": true})
+                        } else if(errcode == 600) { //처리데이터가 없는 경우, 응답데이터가 없는 경우
+                            //각 결과(list) 처리 로직
+                            
+                            response.json({"result": true})
+                        } else { //알 수 없는 정상 상태
+                            console.log("====error====")
+                            console.log("알 수 없는 정상 상태")
+                            console.error("errcode: ", errcode)
+                            console.error("errlist: ", errlist)
+                            console.log("=============")
+                            response.json({"result": false, "errStr": "알 수 없는 정상 상태"})
+                        }
+                    }    
+                });   
+            } else if(result == 2) { //요청처리 전체 에러
+                console.error("====error====")
+                console.error("요청처리 전체 에러")
+                console.error("errcode: ", errcode)
+                if(errcode == 100) {
+                    console.error("--시스템 오류--")
+                    console.error("시스템 에러")
+                } else if(errcode == 200) {
+                    console.error("--구문 오류--")
+                    console.error("요청형식 오류, 필수항목 누락")
+                } else if(errcode == 300) {
+                    console.error("--검증 오류--")
+                    console.error("데이터 오류")
+                } else if(errcode == 400) {
+                    console.error("--코드값 오류--")
+                    console.error("코드정의 오류")
+                } else if(errcode == 500) {
+                    console.error("--데이터형식 오류--")
+                    console.error("데이터 형식/속성 오류")
+                } else if(errcode == 600) {
+                    console.error("--데이터 없음--")
+                    console.error("조회/처리 데이터 없음")
+                }
+                console.error("=============")
+                response.json({"result": false, "errStr": "요청처리 전체 에러"})
+            } else { //알 수 없는 에러 result 코드
+                console.error("====error====")
+                console.error("알 수 없는 에러 코드")
+                console.error("result: ", result)
+                console.error("errcode: ", errcode)
+                console.error("errlist: ", errlist)
+                console.error("=============")
+                response.json({"result": false, "errStr": "알 수 없는 에러 코드"})
+            }    
+        })
+})
+
+// 8.로밍 계약내역 등록/수정
+router.post("/cntr/update", (request, response)=> {
+    let ver = request.ver //*프로토콜 버전 (ex: v100)
+    let spid = request.spid //*회원사 ID (ex: KPC, HEC)
+
+    let spkey = request.body.spkey //*회원사 연계키 (ex: KRKPCxx..xx)
+    let trade_spid = request.body.trade_spid //*충전거래 사업자ID (ex: KEP, HEC)
+    let platform_spid = request.body.platform_spid //*로밍플랫폼 연계기관ID (ex: KEP(한전) MEC(환경부))
+    let cntr_reg_date = request.body.cntr_reg_date //*로밍계약 등록일시 (ex: 20200820135000)
+    let cntr_cfm_date = request.body.cntr_cfm_date //로밍계약 승인완료일시 (ex: 20200820135000)
+    let cntr_status_cd = request.body.cntr_status_cd //*로밍계약 진행단계 (ex: Y(완료) N(진행중))
+    let cntr_st_date = request.body.cntr_st_date //*로밍계약 시작일시 (ex: 20200820135000)
+    let cntr_end_date = request.body.cntr_end_date //*로밍계약 종료일시 (ex: 20200820135000)
+    let sp_calc_ucost = request.body.sp_calc_ucost //*회원사 충전기 정산단가 (ex: 360.20)
+    let sp_charge_ucost = request.body.sp_charge_ucost //*회원사 충전기 회원충전단가 (ex: 450.20)
+    let tsp_calc_ucost = request.body.tsp_calc_ucost //*계약사 충전기 정산단가 (ex: 360.20)
+    let tsp_charge_ucost = request.body.tsp_charge_ucost //*계약사 충전기 회원충전단가 (ex: 470.30)
+
+    let req_data = {
+        "spkey": spkey,
+        "list": {
+            "spid": spid,
+            "trade_spid": trade_spid,
+            "platform_spid": platform_spid,
+            "cntr_reg_date": cntr_reg_date,
+            "cntr_cfm_date": cntr_cfm_date,
+            "cntr_status_cd": cntr_status_cd,
+            "cntr_st_date": cntr_st_date,
+            "cntr_end_date": cntr_end_date,
+            "sp_calc_ucost": sp_calc_ucost,
+            "sp_charge_ucost": sp_charge_ucost,
+            "tsp_calc_ucost": tsp_calc_ucost,
+            "tsp_charge_ucost": tsp_charge_ucost
+        }
+    }
+
+    axios.post(`${kepco_host}:${kepco_port}/evapi/v${ver}/${spid}/cntr/update`, JSON.stringify(req_data), header_json)
+    .then(res=> {
+        //응답결과(result) 코드내역
+        let result = res.body.result //*응답결과(result) 내역 (ex: 응답결과(result) 내역 참조)
+        let errcode = res.body.errcode //*에러코드
+        let snd_cnt = res.body.snd_cnt //*등록요청 건수(등록/수정시)
+        let nor_cnt = res.body.nor_cnt //*정상처리 건수
+        let rcv_cnt = res.body.rcv_cnt //*요청수신 건수(조회시)
+        let ins_cnt = res.body.ins_cnt //*신규등록 건수(등록/수정시)
+        let upd_cnt = res.body.upd_cnt //*변경등록 건수(등록/수정시)
+        let err_cnt = res.body.err_cnt //*에러처리 건수
+        let datetime = res.body.datetime //*처리기준 일시
+        let errlist = res.body.errlist //*에러내역 리스트(등록/수정 오류분 errtList)
+        let resultmsg = res.body.resultmsg //*에러내용
+
+        //처리 결과
+        if(result == 0 || result == 1) {
+            //응답데이터(List)
+            let list = res.body.list //*충전기정보List (ex: )
+            list.forEach(element, index => {
+                
+                //처리 결과
+                if(result == 1) { //요청처리 일부 정상완료
+                    console.error("====error====")
+                    console.error("요청처리 일부 정상완료")
+                    console.error("errcode: ", errcode)
+                    if(errcode == 100) {
+                        console.error("--시스템 오류--")
+                        console.error("시스템 에러")
+                    } else if(errcode == 200) {
+                        console.error("--구문 오류--")
+                        console.error("요청형식 오류, 필수항목 누락")
+                    } else if(errcode == 300) {
+                        console.error("--검증 오류--")
+                        console.error("데이터 오류")
+                    } else if(errcode == 400) {
+                        console.error("--코드값 오류--")
+                        console.error("코드정의 오류")
+                    } else if(errcode == 500) {
+                        console.error("--데이터형식 오류--")
+                        console.error("데이터 형식/속성 오류")
+                    } else if(errcode == 600) {
+                        console.error("--데이터 없음--")
+                        console.error("조회/처리 데이터 없음")
+                    }
+                    console.error("오류분 errlist 확인")
+                    console.error("errlist: ", errlist)
+                    console.error("=============")
+                    //각 결과(list) 처리 로직
+
+                    response.json({"result": false, "errStr": "요청처리 일부 정상완료"})
+                } else { //정상
+                    if(errcode == "") { //처리결과 오류가 없는 경우(errcode = "")
+                        //각 결과(list) 처리 로직
+                        
+                        response.json({"result": true})
+                    } else if(errcode == 600) { //처리데이터가 없는 경우, 응답데이터가 없는 경우
+                        //각 결과(list) 처리 로직
+                        
+                        response.json({"result": true})
+                    } else { //알 수 없는 정상 상태
+                        console.log("====error====")
+                        console.log("알 수 없는 정상 상태")
+                        console.error("errcode: ", errcode)
+                        console.error("errlist: ", errlist)
+                        console.log("=============")
+                        response.json({"result": false, "errStr": "알 수 없는 정상 상태"})
+                    }
+                }    
+            });   
+        } else if(result == 2) { //요청처리 전체 에러
+            console.error("====error====")
+            console.error("요청처리 전체 에러")
+            console.error("errcode: ", errcode)
+            if(errcode == 100) {
+                console.error("--시스템 오류--")
+                console.error("시스템 에러")
+            } else if(errcode == 200) {
+                console.error("--구문 오류--")
+                console.error("요청형식 오류, 필수항목 누락")
+            } else if(errcode == 300) {
+                console.error("--검증 오류--")
+                console.error("데이터 오류")
+            } else if(errcode == 400) {
+                console.error("--코드값 오류--")
+                console.error("코드정의 오류")
+            } else if(errcode == 500) {
+                console.error("--데이터형식 오류--")
+                console.error("데이터 형식/속성 오류")
+            } else if(errcode == 600) {
+                console.error("--데이터 없음--")
+                console.error("조회/처리 데이터 없음")
+            }
+            console.error("=============")
+            response.json({"result": false, "errStr": "요청처리 전체 에러"})
+        } else { //알 수 없는 에러 result 코드
+            console.error("====error====")
+            console.error("알 수 없는 에러 코드")
+            console.error("result: ", result)
+            console.error("errcode: ", errcode)
+            console.error("errlist: ", errlist)
+            console.error("=============")
+            response.json({"result": false, "errStr": "알 수 없는 에러 코드"})
+        }      
+    })
+})
 
 module.exports = router

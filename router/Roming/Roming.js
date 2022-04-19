@@ -266,6 +266,7 @@ router.post("/charging/status", (request, response)=> {
                     let outlet_tp = element.outlet_tp //충전커넥터타입 (ex: 코드참조)
                     let charge_kwh = element.charge_kwh //*충전진행충전량(kWh) (ex: 25.50)
                     let charge_amt = element.charge_amt //충전진행요금(원) (ex: 1500)
+                    let outlet_id = element.outlet_id //*충전진행 아웃렛ID (ex: 1)
 
                     //처리 결과
                     if(result == 1) { //요청처리 일부 정상완료
@@ -353,11 +354,165 @@ router.post("/charging/status", (request, response)=> {
         })
 })
 
-// 3. 로밍 충전내역 등록/수정
+// 3.로밍회원 충전진행 상태 등록
+router.post("/charging/status/update", (request, response)=> {
+    let ver = request.ver //*프로토콜 버전 (ex: v100)
+    let spid = request.spid //*회원사 ID (ex: KPC, HEC)
+
+    let spkey = request.body.spkey //*회원사 연계키 (ex: KRKPCxx..xx)
+    let trade_spid = request.body.trade_spid //*충전거래 사업자ID (ex: KEP, HEC)
+    let cardno = request.body.cardno //*인증요청 회원카드번호 (ex: 1010010000000000)
+    let emaid = request.body.emaid //인증요청 차량회원번호 (ex: KRKEP8YKV7YZW06)
+    let csid = request.body.csid //*인증요청 충전소ID (ex: KRKEP000000001)
+    let cpid = request.body.auth_id //*인증요청 충전기ID (ex: KRKEP000000001)
+    let status_cd = request.body.status_cd //*충전기 상태코드 (ex: 코드참조)
+    let status_dtl_cd = request.body.status_dtl_cd //*충전기 상태 상세코드 (ex: 코드참조)
+    let status_date = request.body.status_date //*충전기 상태변경 일시 (ex: 20200820155000)
+    let spcsid = request.body.spcsid //충전사업자 충전소ID (ex: )
+    let spcpid = request.body.spcpid //충전사업자 충전기ID (ex: )
+    let charge_st_date = request.body.charge_st_date //*충전시작일시 (ex: 20200820155000)
+    let charge_soc = request.body.charge_soc //충전진행SOC값 (ex: 85.00)
+    let charge_tp = request.body.charge_tp //충전방식 (ex: 1(완속) 2(급속))
+    let outlet_tp = request.body.outlet_tp //충전커넥터타입 (ex: 코드참조)
+    let charge_kwh = request.body.charge_kwh //*충전진행충전량(kWh) (ex: 25.50)
+    let charge_amt = request.body.charge_amt //충전진행요금(원) (ex: 1500)
+
+    let req_data = {
+        "spkey": spkey,
+        "list": {
+            "spid": spid,
+            "trade_spid": trade_spid,
+            "cardno": cardno,
+            "emaid": emaid,
+            "csid": csid,
+            "cpid": cpid,
+            "status_cd": status_cd,
+            "status_dtl_cd": status_dtl_cd,
+            "status_date": status_date,
+            "spcsid": spcsid,
+            "spcpid": spcpid,
+            "charge_st_date": charge_st_date,
+            "charge_soc": charge_soc,
+            "charge_tp": charge_tp,
+            "outlet_tp": outlet_tp,
+            "charge_kwh": charge_kwh,
+            "charge_amt": charge_amt,
+        }
+    }
+
+    axios.post(`${kepco_host}:${kepco_port}/evapi/v${ver}/${spid}/charge/status/update`, JSON.stringify(req_data), header_json)
+    .then(res=> {
+        //응답결과(result) 코드내역
+        let result = res.body.result //*응답결과(result) 내역 (ex: 응답결과(result) 내역 참조)
+        let errcode = res.body.errcode //*에러코드
+        let snd_cnt = res.body.snd_cnt //*등록요청 건수(등록/수정시)
+        let nor_cnt = res.body.nor_cnt //*정상처리 건수
+        let rcv_cnt = res.body.rcv_cnt //*요청수신 건수(조회시)
+        let ins_cnt = res.body.ins_cnt //*신규등록 건수(등록/수정시)
+        let upd_cnt = res.body.upd_cnt //*변경등록 건수(등록/수정시)
+        let err_cnt = res.body.err_cnt //*에러처리 건수
+        let datetime = res.body.datetime //*처리기준 일시
+        let errlist = res.body.errlist //*에러내역 리스트(등록/수정 오류분 errtList)
+        let resultmsg = res.body.resultmsg //*에러내용
+
+        //처리 결과
+        if(result == 0 || result == 1) {
+            //응답데이터(List)
+            let list = res.body.list //*충전기정보List (ex: )
+            list.forEach(element, index => {
+                
+                //처리 결과
+                if(result == 1) { //요청처리 일부 정상완료
+                    console.error("====error====")
+                    console.error("요청처리 일부 정상완료")
+                    console.error("errcode: ", errcode)
+                    if(errcode == 100) {
+                        console.error("--시스템 오류--")
+                        console.error("시스템 에러")
+                    } else if(errcode == 200) {
+                        console.error("--구문 오류--")
+                        console.error("요청형식 오류, 필수항목 누락")
+                    } else if(errcode == 300) {
+                        console.error("--검증 오류--")
+                        console.error("데이터 오류")
+                    } else if(errcode == 400) {
+                        console.error("--코드값 오류--")
+                        console.error("코드정의 오류")
+                    } else if(errcode == 500) {
+                        console.error("--데이터형식 오류--")
+                        console.error("데이터 형식/속성 오류")
+                    } else if(errcode == 600) {
+                        console.error("--데이터 없음--")
+                        console.error("조회/처리 데이터 없음")
+                    }
+                    console.error("오류분 errlist 확인")
+                    console.error("errlist: ", errlist)
+                    console.error("=============")
+                    //각 결과(list) 처리 로직
+
+                    response.json({"result": false, "errStr": "요청처리 일부 정상완료"})
+                } else { //정상
+                    if(errcode == "") { //처리결과 오류가 없는 경우(errcode = "")
+                        //각 결과(list) 처리 로직
+                        
+                        response.json({"result": true})
+                    } else if(errcode == 600) { //처리데이터가 없는 경우, 응답데이터가 없는 경우
+                        //각 결과(list) 처리 로직
+                        
+                        response.json({"result": true})
+                    } else { //알 수 없는 정상 상태
+                        console.log("====error====")
+                        console.log("알 수 없는 정상 상태")
+                        console.error("errcode: ", errcode)
+                        console.error("errlist: ", errlist)
+                        console.log("=============")
+                        response.json({"result": false, "errStr": "알 수 없는 정상 상태"})
+                    }
+                }    
+            });   
+        } else if(result == 2) { //요청처리 전체 에러
+            console.error("====error====")
+            console.error("요청처리 전체 에러")
+            console.error("errcode: ", errcode)
+            if(errcode == 100) {
+                console.error("--시스템 오류--")
+                console.error("시스템 에러")
+            } else if(errcode == 200) {
+                console.error("--구문 오류--")
+                console.error("요청형식 오류, 필수항목 누락")
+            } else if(errcode == 300) {
+                console.error("--검증 오류--")
+                console.error("데이터 오류")
+            } else if(errcode == 400) {
+                console.error("--코드값 오류--")
+                console.error("코드정의 오류")
+            } else if(errcode == 500) {
+                console.error("--데이터형식 오류--")
+                console.error("데이터 형식/속성 오류")
+            } else if(errcode == 600) {
+                console.error("--데이터 없음--")
+                console.error("조회/처리 데이터 없음")
+            }
+            console.error("=============")
+            response.json({"result": false, "errStr": "요청처리 전체 에러"})
+        } else { //알 수 없는 에러 result 코드
+            console.error("====error====")
+            console.error("알 수 없는 에러 코드")
+            console.error("result: ", result)
+            console.error("errcode: ", errcode)
+            console.error("errlist: ", errlist)
+            console.error("=============")
+            response.json({"result": false, "errStr": "알 수 없는 에러 코드"})
+        }      
+    })
+})
+
+// 4. 로밍 충전내역 등록/수정
 router.post("/charging/info/update", (request, response)=> {
     let ver = request.ver //*프로토콜 버전 (ex: v100)
     let spid = request.spid //*회원사 ID (ex: KPC, HEC)
 
+    let spkey = request.body.spkey //*회원사 연계키 (ex: KRKPCxx..xx)
     // let list = request.body.list //*충전내역 등록정보 LIST (ex: )
     // let spid = request.body.spid //*회원사ID (ex: KPC, HEC)
     let trade_spid = request.body.trade_spid //*충전거래 사업자ID (ex: KPC, HEC)
@@ -389,6 +544,7 @@ router.post("/charging/info/update", (request, response)=> {
     let platform_spid = request.body.platform_spid //*로밍플랫폼 연계기관ID (ex: KPC(한전) MEC(환경부))
 
     let req_data = {
+        "spkey": spkey,
         "list": {
             "spid": spid,
             "trade_spid": trade_spid,
@@ -544,7 +700,7 @@ router.post("/charging/info/update", (request, response)=> {
         })
 })
 
-// 4. 로밍 충전 통계 조회
+// 5. 로밍 충전 통계 조회
 router.post("/charging/static/info", (request, response)=> {
     let ver = request.ver //*프로토콜 버전 (ex: v100)
     let spid = request.spid //*회원사 ID (ex: KPC, HEC)
@@ -685,7 +841,7 @@ router.post("/charging/static/info", (request, response)=> {
         })
 })
 
-// 5. 로밍 충전 통계내역 조회
+// 6. 로밍 충전 통계내역 조회
 router.post("/charging/static/info/history", (request, response)=> {
     let ver = request.ver //*프로토콜 버전 (ex: v100)
     let spid = request.spid //*회원사 ID (ex: KPC, HEC)
@@ -833,5 +989,288 @@ router.post("/charging/static/info/history", (request, response)=> {
         })
 })
 
+// 7. 로밍 충전 통계 등록
+router.post("/charging/static/update", (request, response)=> {
+    let ver = request.ver //*프로토콜 버전 (ex: v100)
+    let spid = request.spid //*회원사 ID (ex: KPC, HEC)
+
+    let spkey = request.body.spkey //*회원사 연계키 (ex: KRKPCxx..xx)
+    let trade_spid = request.body.trade_spid //*충전거래 사업자ID (ex: KEP, HEC)
+    let platform_spid = request.body.platform_spid //*로밍플랫폼 연계기관ID (ex: KEP(한전) MEC(환경부))
+    let charge_ymd = request.body.charge_ymd //*충전일자 (ex: 20200827)
+    let charge_cnt = request.body.charge_cnt //*충전건수(건) (ex: 25)
+    let charge_kwh = request.body.charge_kwh //*충전량(kWh) (ex: 845.85)
+    let charge_amt = request.body.charge_amt //*충전요금(원) (ex: 248530)
+    let reg_date = request.body.reg_date //*충전통계 생성일시 (ex: 20200820155000)
+    let upd_date = request.body.upd_date //*충전통계 변경일시 (ex: 20200820155000)
+
+    let req_data = {
+        "spkey": spkey,
+        "list": {
+            "spid": spid,
+            "trade_spid": trade_spid,
+            "platform_spid": platform_spid,
+            "charge_ymd": charge_ymd,
+            "charge_cnt": charge_cnt,
+            "charge_kwh": charge_kwh,
+            "charge_amt": charge_amt,
+            "reg_date": reg_date,
+            "upd_date": upd_date,
+        }
+    }
+
+    axios.post(`${kepco_host}:${kepco_port}/evapi/v${ver}/${spid}/charge/static/update`, JSON.stringify(req_data), header_json)
+    .then(res=> {
+        //응답결과(result) 코드내역
+        let result = res.body.result //*응답결과(result) 내역 (ex: 응답결과(result) 내역 참조)
+        let errcode = res.body.errcode //*에러코드
+        let snd_cnt = res.body.snd_cnt //*등록요청 건수(등록/수정시)
+        let nor_cnt = res.body.nor_cnt //*정상처리 건수
+        let rcv_cnt = res.body.rcv_cnt //*요청수신 건수(조회시)
+        let ins_cnt = res.body.ins_cnt //*신규등록 건수(등록/수정시)
+        let upd_cnt = res.body.upd_cnt //*변경등록 건수(등록/수정시)
+        let err_cnt = res.body.err_cnt //*에러처리 건수
+        let datetime = res.body.datetime //*처리기준 일시
+        let errlist = res.body.errlist //*에러내역 리스트(등록/수정 오류분 errtList)
+        let resultmsg = res.body.resultmsg //*에러내용
+
+        //처리 결과
+        if(result == 0 || result == 1) {
+            //응답데이터(List)
+            let list = res.body.list //*충전기정보List (ex: )
+            list.forEach(element, index => {
+                
+                //처리 결과
+                if(result == 1) { //요청처리 일부 정상완료
+                    console.error("====error====")
+                    console.error("요청처리 일부 정상완료")
+                    console.error("errcode: ", errcode)
+                    if(errcode == 100) {
+                        console.error("--시스템 오류--")
+                        console.error("시스템 에러")
+                    } else if(errcode == 200) {
+                        console.error("--구문 오류--")
+                        console.error("요청형식 오류, 필수항목 누락")
+                    } else if(errcode == 300) {
+                        console.error("--검증 오류--")
+                        console.error("데이터 오류")
+                    } else if(errcode == 400) {
+                        console.error("--코드값 오류--")
+                        console.error("코드정의 오류")
+                    } else if(errcode == 500) {
+                        console.error("--데이터형식 오류--")
+                        console.error("데이터 형식/속성 오류")
+                    } else if(errcode == 600) {
+                        console.error("--데이터 없음--")
+                        console.error("조회/처리 데이터 없음")
+                    }
+                    console.error("오류분 errlist 확인")
+                    console.error("errlist: ", errlist)
+                    console.error("=============")
+                    //각 결과(list) 처리 로직
+
+                    response.json({"result": false, "errStr": "요청처리 일부 정상완료"})
+                } else { //정상
+                    if(errcode == "") { //처리결과 오류가 없는 경우(errcode = "")
+                        //각 결과(list) 처리 로직
+                        
+                        response.json({"result": true})
+                    } else if(errcode == 600) { //처리데이터가 없는 경우, 응답데이터가 없는 경우
+                        //각 결과(list) 처리 로직
+                        
+                        response.json({"result": true})
+                    } else { //알 수 없는 정상 상태
+                        console.log("====error====")
+                        console.log("알 수 없는 정상 상태")
+                        console.error("errcode: ", errcode)
+                        console.error("errlist: ", errlist)
+                        console.log("=============")
+                        response.json({"result": false, "errStr": "알 수 없는 정상 상태"})
+                    }
+                }    
+            });   
+        } else if(result == 2) { //요청처리 전체 에러
+            console.error("====error====")
+            console.error("요청처리 전체 에러")
+            console.error("errcode: ", errcode)
+            if(errcode == 100) {
+                console.error("--시스템 오류--")
+                console.error("시스템 에러")
+            } else if(errcode == 200) {
+                console.error("--구문 오류--")
+                console.error("요청형식 오류, 필수항목 누락")
+            } else if(errcode == 300) {
+                console.error("--검증 오류--")
+                console.error("데이터 오류")
+            } else if(errcode == 400) {
+                console.error("--코드값 오류--")
+                console.error("코드정의 오류")
+            } else if(errcode == 500) {
+                console.error("--데이터형식 오류--")
+                console.error("데이터 형식/속성 오류")
+            } else if(errcode == 600) {
+                console.error("--데이터 없음--")
+                console.error("조회/처리 데이터 없음")
+            }
+            console.error("=============")
+            response.json({"result": false, "errStr": "요청처리 전체 에러"})
+        } else { //알 수 없는 에러 result 코드
+            console.error("====error====")
+            console.error("알 수 없는 에러 코드")
+            console.error("result: ", result)
+            console.error("errcode: ", errcode)
+            console.error("errlist: ", errlist)
+            console.error("=============")
+            response.json({"result": false, "errStr": "알 수 없는 에러 코드"})
+        }      
+    })
+})
+
+// 8. 로밍 충전 통계내역 등록
+router.post("/charging/static/detail/update", (request, response)=> {
+    let ver = request.ver //*프로토콜 버전 (ex: v100)
+    let spid = request.spid //*회원사 ID (ex: KPC, HEC)
+
+    let spkey = request.body.spkey //*회원사 연계키 (ex: KRKPCxx..xx)
+    let trade_spid = request.body.trade_spid //*충전거래 사업자ID (ex: KEP, HEC)
+    let platform_spid = request.body.platform_spid //*로밍플랫폼 연계기관ID (ex: KEP(한전) MEC(환경부))
+    let charge_ymd = request.body.charge_ymd //*충전일자 (ex: 20200827)
+    let csid = request.body.csid //*로밍플랫폼 충전소ID (ex: KRKEP000000001)
+    let cpid = request.body.cpid //*로밍플랫폼 충전기ID (ex: KRKEP000000001)
+    let outlet_id = request.body.outlet_id //*충전기 아웃렛ID (ex: 1(기본), 1~100범위)
+    let spcsid = request.body.spcsid //충전사업자 충전소ID (ex: )
+    let spcpid = request. body.spcpid //충전사업자 충전기ID (ex: )
+    let charge_cnt = request.body.charge_cnt //*충전건수(건) (ex: 25)
+    let charge_kwh = request.body.charge_kwh //*충전량(kWh) (ex: 845.85)
+    let charge_amt = request.body.charge_amt //*충전요금(원) (ex: 248530)
+    let reg_date = request.body.reg_date //*충전통계 생성일시 (ex: 20200820155000)
+    let upd_date = request.body.upd_date //*충전통계 변경일시 (ex: 20200820155000)
+
+    let req_data = {
+        "spkey": spkey,
+        "list": {
+            "spid": spid,
+            "trade_spid": trade_spid,
+            "platform_spid": platform_spid,
+            "charge_ymd": charge_ymd,
+            "csid": csid,
+            "cpid": cpid,
+            "outlet_id": outlet_id,
+            "spcsid": spcsid,
+            "spcpid": spcpid,
+            "charge_cnt": charge_cnt,
+            "charge_kwh": charge_kwh,
+            "charge_amt": charge_amt,
+            "reg_date": reg_date,
+            "upd_date": upd_date,
+        }
+    }
+
+    axios.post(`${kepco_host}:${kepco_port}/evapi/v${ver}/${spid}/charge/static/detail/update`, JSON.stringify(req_data), header_json)
+    .then(res=> {
+        //응답결과(result) 코드내역
+        let result = res.body.result //*응답결과(result) 내역 (ex: 응답결과(result) 내역 참조)
+        let errcode = res.body.errcode //*에러코드
+        let snd_cnt = res.body.snd_cnt //*등록요청 건수(등록/수정시)
+        let nor_cnt = res.body.nor_cnt //*정상처리 건수
+        let rcv_cnt = res.body.rcv_cnt //*요청수신 건수(조회시)
+        let ins_cnt = res.body.ins_cnt //*신규등록 건수(등록/수정시)
+        let upd_cnt = res.body.upd_cnt //*변경등록 건수(등록/수정시)
+        let err_cnt = res.body.err_cnt //*에러처리 건수
+        let datetime = res.body.datetime //*처리기준 일시
+        let errlist = res.body.errlist //*에러내역 리스트(등록/수정 오류분 errtList)
+        let resultmsg = res.body.resultmsg //*에러내용
+
+        //처리 결과
+        if(result == 0 || result == 1) {
+            //응답데이터(List)
+            let list = res.body.list //*충전기정보List (ex: )
+            list.forEach(element, index => {
+                
+                //처리 결과
+                if(result == 1) { //요청처리 일부 정상완료
+                    console.error("====error====")
+                    console.error("요청처리 일부 정상완료")
+                    console.error("errcode: ", errcode)
+                    if(errcode == 100) {
+                        console.error("--시스템 오류--")
+                        console.error("시스템 에러")
+                    } else if(errcode == 200) {
+                        console.error("--구문 오류--")
+                        console.error("요청형식 오류, 필수항목 누락")
+                    } else if(errcode == 300) {
+                        console.error("--검증 오류--")
+                        console.error("데이터 오류")
+                    } else if(errcode == 400) {
+                        console.error("--코드값 오류--")
+                        console.error("코드정의 오류")
+                    } else if(errcode == 500) {
+                        console.error("--데이터형식 오류--")
+                        console.error("데이터 형식/속성 오류")
+                    } else if(errcode == 600) {
+                        console.error("--데이터 없음--")
+                        console.error("조회/처리 데이터 없음")
+                    }
+                    console.error("오류분 errlist 확인")
+                    console.error("errlist: ", errlist)
+                    console.error("=============")
+                    //각 결과(list) 처리 로직
+
+                    response.json({"result": false, "errStr": "요청처리 일부 정상완료"})
+                } else { //정상
+                    if(errcode == "") { //처리결과 오류가 없는 경우(errcode = "")
+                        //각 결과(list) 처리 로직
+                        
+                        response.json({"result": true})
+                    } else if(errcode == 600) { //처리데이터가 없는 경우, 응답데이터가 없는 경우
+                        //각 결과(list) 처리 로직
+                        
+                        response.json({"result": true})
+                    } else { //알 수 없는 정상 상태
+                        console.log("====error====")
+                        console.log("알 수 없는 정상 상태")
+                        console.error("errcode: ", errcode)
+                        console.error("errlist: ", errlist)
+                        console.log("=============")
+                        response.json({"result": false, "errStr": "알 수 없는 정상 상태"})
+                    }
+                }    
+            });   
+        } else if(result == 2) { //요청처리 전체 에러
+            console.error("====error====")
+            console.error("요청처리 전체 에러")
+            console.error("errcode: ", errcode)
+            if(errcode == 100) {
+                console.error("--시스템 오류--")
+                console.error("시스템 에러")
+            } else if(errcode == 200) {
+                console.error("--구문 오류--")
+                console.error("요청형식 오류, 필수항목 누락")
+            } else if(errcode == 300) {
+                console.error("--검증 오류--")
+                console.error("데이터 오류")
+            } else if(errcode == 400) {
+                console.error("--코드값 오류--")
+                console.error("코드정의 오류")
+            } else if(errcode == 500) {
+                console.error("--데이터형식 오류--")
+                console.error("데이터 형식/속성 오류")
+            } else if(errcode == 600) {
+                console.error("--데이터 없음--")
+                console.error("조회/처리 데이터 없음")
+            }
+            console.error("=============")
+            response.json({"result": false, "errStr": "요청처리 전체 에러"})
+        } else { //알 수 없는 에러 result 코드
+            console.error("====error====")
+            console.error("알 수 없는 에러 코드")
+            console.error("result: ", result)
+            console.error("errcode: ", errcode)
+            console.error("errlist: ", errlist)
+            console.error("=============")
+            response.json({"result": false, "errStr": "알 수 없는 에러 코드"})
+        }      
+    })
+})
 
 module.exports = router

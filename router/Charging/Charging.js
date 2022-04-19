@@ -239,6 +239,8 @@ router.post("/device/info", (request, response)=> {
                     let outlet_cnt = element.outlet_cnt //*동시충전가능 아웃렛수 (ex: 1(기본), 1~100범위)
                     let pnc_yn = element.pnc_yn //PnC충전가능 여부 (ex: Y(PnC지원) N(PnC미지원))
                     let cpkw = element.cpkw //*충전기 용량 (ex: 7.7(완속) 50(급속), 100)
+                    let charge_div = element.charge_div //*충전기구분 (ex: 1(완속) 2(급속) 3(초급속))
+                    let cp_tp = element.cp.tp //*충전기유형 (ex: 코드참조)
                     let postcd = element.postcd //*우편번호 (ex: 코드참조)
                     let cs_div = element.cs_div //*충전소 운영 유형 (ex: 코드참조)
                     let outlet_div = element.outlet_div //*아웃렛 유형 (ex: 코드참조)
@@ -503,7 +505,9 @@ router.post("/device/id_info", (request, response)=> {
     let cpid = request.body.cpid //로밍플랫폼 충전기ID (ex: )
     let spcsid = request.body.spcsid //회원사 충전소ID (ex: )
     let spcpid = request.body.spcpid //회원사 충전기ID (ex: )
+    let udate = request.body.udate //기준일시 이후 갱신된 정보 조회 (ex: )
     let selfex = request.body.selfex //spid와 동일사업자 정보 제외 (ex: Y(제외), N(포함))
+    let period = request.body.period //최근 갱신시간(분) (ex: 30, 60, all(전체))
 
     let req_data = {
         "spkey": spkey,
@@ -512,7 +516,9 @@ router.post("/device/id_info", (request, response)=> {
         "cpid": cpid,
         "spcsid": spcsid,
         "spcpid": spcpid,
+        "udate": udate,
         "selfex": selfex,
+        "period": period,
     }
 
     axios.post(`${kepco_host}:${kepco_port}/evapi/v${ver}/${spid}/cp/idinfo`, JSON.stringify(req_data), header_json)
@@ -811,6 +817,7 @@ router.post("/device/info/update", (request, response)=> {
     let ver = request.body.ver //*프로토콜 버전 (ex: v100)
     let spid = request.body.spid //*회원사 ID (ex: KPC, HEC)
 
+    let spkey = request.body.spkey //*회원사 연계키 (ex: KRKPCxx..xx)
     // let list = request.body.list //*충전소정보 LIST (ex: )
     // let spid = request.body.spid //*회원사ID (ex: KPC, HEC)
     let csid = request.body.csid //*로밍플랫폼 충전소ID (ex: KRKPC000000001)
@@ -830,6 +837,8 @@ router.post("/device/info/update", (request, response)=> {
     let outlet_cnt = request.body.outlet_cnt //*동시충전가능 아웃렛수 (ex: 1(기본), 1~100범위)
     let pnc_yn = request.body.pnc_yn //PnC충전가능 여부 (ex: Y(PnC지원) N(PnC미지원))
     let cpkw = request.body.cpkw //*충전기 용량 (ex: 7.7(완속) 50(급속), 100)
+    let charge_div = request.body.charge_div //*충전기구분 (ex: 1(완속) 2(급속) 3(초급속))
+    let cp_tp = request.body.cp_tp //*충전기유형 (ex: 코드참조)
     let postcd = request.body.postcd //*우편번호 (ex: 코드참조)
     let cs_div = request.body.cs_div //*충전소 운영 유형 (ex: 코드참조)
     let outlet_div = request.body.outlet_div //*아웃렛 유형 (ex: 코드참조)
@@ -842,6 +851,7 @@ router.post("/device/info/update", (request, response)=> {
     let ami_cert = request.body.ami_cert //계량기 인증번호 (ex: )
 
     let req_data = {
+        "spkey": spkey,
         "list": {
             "spid": spid,
             "csid": csid,
@@ -861,6 +871,8 @@ router.post("/device/info/update", (request, response)=> {
             "outlet_cnt": outlet_cnt,
             "pnc_yn": pnc_yn,
             "cpkw": cpkw,
+            "charge_div": charge_div,
+            "cp_tp": cp_tp,
             "postcd": postcd,
             "cs_div": cs_div,
             "outlet_div": outlet_div,
@@ -991,6 +1003,7 @@ router.post("/device/status/update", (request, response)=> {
     let ver = request.body.ver //*프로토콜 버전 (ex: v100)
     let spid = request.body.spid //*회원사 ID (ex: KPC, HEC)
 
+    let spkey = request.body.spkey //*회원사 연계키 (ex: KRKPCxx..xx)
     // let list = request.body.list //*충전소정보 LIST (ex: )
     // let spid = request.body.spid //*회원사ID (ex: KPC, HEC)
     let csid = request.body.csid //*로밍플랫폼 충전소ID (ex: KRKPC000000001)
@@ -1011,6 +1024,7 @@ router.post("/device/status/update", (request, response)=> {
     let stop_end_date = request.body.stop_end_date //이용중지 종료일시 (ex: 20200825175000)
 
     let req_data = {
+        "spkey": spkey,
         "list": {
             "spid": spid,
             "csid": csid,
@@ -1293,6 +1307,7 @@ router.post("/device/reserv/update", (request, response)=> {
     let ver = request.ver //*프로토콜 버전 (ex: v100)
     let spid = request.spid //*회원사 ID (ex: KPC, HEC)
 
+    let spkey = request.body.spkey //*회원사 연계키 (ex: KRKPCxx..xx)
     // let list = request.body.list //*충전소정보 LIST (ex: )
     // let spid = request.body.spid //*회원사ID (ex: KPC, HEC)
     let csid = request.body.csid //*로밍플랫폼 충전소ID (ex: KRKPC000000001)
@@ -1307,6 +1322,7 @@ router.post("/device/reserv/update", (request, response)=> {
     let reserv_date = request.body.reserv_date //*예약일시 (ex: )
 
     let req_data = {
+        "spkey": spkey,
         "list": {
             "spid": spid,
             "csid": csid,
