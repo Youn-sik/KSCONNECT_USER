@@ -34,7 +34,7 @@ setInterval(async ()=> {
 }, 1000*10)
 
 
-
+// 1. 충전소 정보 조회
 async function cs_info(data) {
     let req_data = data
     let result = await axios.post(`${kepco_host}:${kepco_port}/evapi/v${ver}/${spid}/cs/info`, JSON.stringify(req_data), header_json)
@@ -172,6 +172,7 @@ async function cs_info(data) {
     return result
 }
 
+// 2. 충전기 정보 조회
 async function cp_info(data) {
     let req_data = data
     let result = await axios.post(`${kepco_host}:${kepco_port}/evapi/v${ver}/${spid}/cp/info`, JSON.stringify(req_data), header_json)
@@ -317,6 +318,7 @@ async function cp_info(data) {
     return result
 }
 
+// 3. 충전기 상태 조회
 async function cp_status(data) {
     let req_data = data
     let result = await axios.post(`${kepco_host}:${kepco_port}/evapi/v${ver}/${spid}/cp/status`, JSON.stringify(req_data), header_json)
@@ -448,6 +450,7 @@ async function cp_status(data) {
     return result
 }
 
+// 4. 충전기ID 매핑정보 조회
 async function cp_idinfo(data) {
     let req_data = data
     let result = await axios.post(`${kepco_host}:${kepco_port}/evapi/v${ver}/${spid}/cp/idinfo`, JSON.stringify(req_data), header_json)
@@ -576,6 +579,7 @@ async function cp_idinfo(data) {
     return result
 }
 
+// 5. 충전소 정보 등록/수정
 async function cs_update(data) {
     let req_data = data
     let result = await axios.post(`${kepco_host}:${kepco_port}/evapi/v${ver}/${spid}/cs/update`, JSON.stringify(req_data), header_json)
@@ -693,6 +697,7 @@ async function cs_update(data) {
     return result
 }
 
+// 6. 충전기 정보 등록/수정
 async function cp_update(data) {
     let req_data = data
     let result = await axios.post(`${kepco_host}:${kepco_port}/evapi/v${ver}/${spid}/cp/update`, JSON.stringify(req_data), header_json)
@@ -812,6 +817,7 @@ async function cp_update(data) {
     return result
 }
 
+// 7. 충전기 상태정보 등록/수정
 async function cp_status_update(data) {
     let req_data = data
     let result = await axios.post(`${kepco_host}:${kepco_port}/evapi/v${ver}/${spid}/cp/status/update`, JSON.stringify(req_data), header_json)
@@ -926,6 +932,7 @@ async function cp_status_update(data) {
     return result
 }
 
+// 8. 충전기 예약정보 조회
 async function reserv_info(data) {
     let req_data = data
     let result = await axios.post(`${kepco_host}:${kepco_port}/evapi/v${ver}/${spid}/reserv/info`, JSON.stringify(req_data), header_json)
@@ -1053,6 +1060,7 @@ async function reserv_info(data) {
     return result
 }
 
+// 9. 충전기 예약정보 등록/수정
 async function reserv_update(data) {
     let req_data = data
     let result = await axios.post(`${kepco_host}:${kepco_port}/evapi/v${ver}/${spid}/reserv/update`, JSON.stringify(req_data), header_json)
@@ -1180,6 +1188,7 @@ async function reserv_update(data) {
     return result
 }
 
+
 router.get("/", (req, res)=> {
     console.log("Charging")
     res.send("Charging")
@@ -1223,7 +1232,6 @@ router.post("/station/info", async (request, response)=> {
     //     response.json({"result": false, "errStr": "Request Failed"})
     // }
 })
-
 
 // 2. 충전기 정보 조회
 router.post("/device/info", async (request, response)=> {
