@@ -1,6 +1,8 @@
 {
     "ver": "v100",
-    "spid": "회원사ID",
-    "spkey": "회원사 연계키",
-    "provider_id": "조회 회원사"
+    "spid": "KOS",
+    "spkey": "KOS123456789",
+    "provider_id": "조회 회원사",
+    "kepco_host": "172.16.38.157",
+    "kepco_port": "0000"
 }
