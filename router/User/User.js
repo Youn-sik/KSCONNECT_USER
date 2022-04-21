@@ -1,6 +1,7 @@
 const express = require("express")
 const router = express.Router()
 const axios = require("axios")
+const schedule = require("node-schedule")
 const kepco_info = require("../../RomingInfo.json")
 
 const header_json = {
@@ -16,17 +17,17 @@ const basic_req_data = {
     "spkey": spkey
 }
 
-setInterval(async ()=> {
+const uid_info_job = schedule.scheduleJob('0 */1 * * * *', async ()=> {
+// const uid_info_job = schedule.scheduleJob('0 0 0 */1 * *', async ()=> {
     let result = await uid_info(basic_req_data)
     console.log(result)
-// }, 1000*60*60*24)
-}, 1000*10)
+})
 
-setInterval(async ()=> {
+const auth_info_job = schedule.scheduleJob('0 */1 * * * *', async ()=> {
+// const auth_info_job = schedule.scheduleJob('0 0 0 */1 * *', async ()=> {
     let result = await auth_info(basic_req_data)
     console.log(result)
-// }, 1000*60*60*24)
-}, 1000*10)
+})
 
 
 // 1. 회원정보 조회
