@@ -1,6 +1,14 @@
+DROP TABLE IF EXISTS `company`;
+CREATE TABLE `company` (
+  `company_id` int(10) NOT NULL AUTO_INCREMENT,
+  `name` varchar(50) NOT NULL,
+  `company_number` varchar(10) NOT NULL,
+  PRIMARY KEY (`company_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
+
 DROP TABLE IF EXISTS `charge_station`;
 CREATE TABLE `charge_station` (
-  `station_id` int(10) NOT NULL AUTO_INCREASE,
+  `station_id` int(10) NOT NULL AUTO_INCREMENT,
   `company_id` int(10) NOT NULL,
   `name` varchar(20) NOT NULL,
   `status` varchar(20) NOT NULL,
@@ -12,14 +20,14 @@ CREATE TABLE `charge_station` (
   `pay_type` varchar(20) NOT NULL,
   PRIMARY KEY (`station_id`),
   KEY `company_id_FK` (`company_id`),
-  CONSTRAINT `company_id_FK` FOREIGN KEY(`company_id`) REFERENCES `company` (`company_id`)
+  CONSTRAINT `company_id_FK1` FOREIGN KEY(`company_id`) REFERENCES `company` (`company_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
 
 
 DROP TABLE IF EXISTS `charge_device`;
 CREATE TABLE `charge_device` (
-  `device_id` int(10) NOT NULL AUTO_INCREASE,
-  `station_id` int(10) DEFAULT NULL,
+  `device_id` int(10) NOT NULL AUTO_INCREMENT,
+  `station_id` int(10) NOT NULL,
   `name` varchar(20) NOT NULL,
   `sirial` varchar(50) NOT NULL,
   `charge_type` varchar(20) NOT NULL,
@@ -30,22 +38,14 @@ CREATE TABLE `charge_device` (
   `device_number` int(20) NOT NULL,
   PRIMARY KEY (`device_id`),
   KEY `station_id_FK` (`station_id`),
-  CONSTRAINT `station_id_FK` FOREIGN KEY(`station_id`) REFERENCES `charge_station` (`station_id`)
+  CONSTRAINT `station_id_FK1` FOREIGN KEY(`station_id`) REFERENCES `charge_station` (`station_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
 
-
-DROP TABLE IF EXISTS `company`;
-CREATE TABLE `company` (
-  `company_id` int(10) NOT NULL AUTO_INCREASE,
-  `name` varchar(50) NOT NULL,
-  `company_number` varchar(10) NOT NULL,
-  PRIMARY KEY (`company_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
 
 
 DROP TABLE IF EXISTS `user`;
 CREATE TABLE `user` (
-  `uid` int(10) NOT NULL AUTO_INCREASE,
+  `uid` int(10) NOT NULL AUTO_INCREMENT,
   `id` varchar(50) NOT NULL,
   `password` varchar(255) NOT NULL,
   `name` varchar(20) NOT NULL,
@@ -64,7 +64,7 @@ CREATE TABLE `user` (
 
 DROP TABLE IF EXISTS `point_record`;
 CREATE TABLE `point_record` (
-`ponint_record_id` int(10) NOT NULL AUTO_INCREASE,
+`ponint_record_id` int(10) NOT NULL AUTO_INCREMENT,
 `uid` int(10) NOT NULL,
 `status` varchar(20) NOT NULL,
 `current_point` int(20) NOT NULL,
@@ -73,13 +73,13 @@ CREATE TABLE `point_record` (
 `date` datetime NOT NULL,
   PRIMARY KEY (`ponint_record_id`),
   KEY `uid_FK` (`uid`),
-  CONSTRAINT `uid_FK` FOREIGN KEY(`uid`) REFERENCES `user` (`uid`)
+  CONSTRAINT `uid_FK1` FOREIGN KEY(`uid`) REFERENCES `user` (`uid`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
 
 
 DROP TABLE IF EXISTS `product`;
 CREATE TABLE `product` (
-  `product_id` int(10) NOT NULL AUTO_INCREASE,
+  `product_id` int(10) NOT NULL AUTO_INCREMENT,
   `title` varchar(50) NOT NULL,
   `context` varchar(255) NOT NULL,
   `price` int(20) NOT NULL,
@@ -89,7 +89,7 @@ CREATE TABLE `product` (
 
 DROP TABLE IF EXISTS `product_record`;
 CREATE TABLE `product_record` (
-  `product_record_id` int(10) NOT NULL AUTO_INCREASE,
+  `product_record_id` int(10) NOT NULL AUTO_INCREMENT,
   `uid` int(10) NOT NULL,
   `product_id` int(10) NOT NULL,
   `status` varchar(20) NOT NULL,
@@ -99,14 +99,14 @@ CREATE TABLE `product_record` (
   PRIMARY KEY (`product_record_id`),
   KEY `uid_FK` (`uid`),
   KEY `product_id_FK` (`product_id`),
-  CONSTRAINT `uid_FK` FOREIGN KEY(`uid`) REFERENCES `user` (`uid`),
+  CONSTRAINT `uid_FK2` FOREIGN KEY(`uid`) REFERENCES `user` (`uid`),
   CONSTRAINT `product_id_FK` FOREIGN KEY(`product_id`) REFERENCES `product` (`product_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
 
 
 DROP TABLE IF EXISTS `charge_record`;
 CREATE TABLE `charge_record` (
-  `product_record_id` int(10) NOT NULL AUTO_INCREASE,
+  `product_record_id` int(10) NOT NULL AUTO_INCREMENT,
   `uid` int(10) NOT NULL,
   `station_id` int(10) NOT NULL,
   `device_id` int(10) NOT NULL,
@@ -131,15 +131,15 @@ CREATE TABLE `charge_record` (
   KEY `uid_FK` (`uid`),
   KEY `station_id_FK` (`station_id`),
   KEY `device_id_FK` (`device_id`),
-  CONSTRAINT `uid_FK` FOREIGN KEY(`uid`) REFERENCES `user` (`uid`),
-  CONSTRAINT `station_id_FK` FOREIGN KEY(`station_id`) REFERENCES `charge_station` (`station_id`),
-  CONSTRAINT `device_id_FK` FOREIGN KEY(`device_id`) REFERENCES `charge_device` (`device_id`)
+  CONSTRAINT `uid_FK3` FOREIGN KEY(`uid`) REFERENCES `user` (`uid`),
+  CONSTRAINT `station_id_FK2` FOREIGN KEY(`station_id`) REFERENCES `charge_station` (`station_id`),
+  CONSTRAINT `device_id_FK1` FOREIGN KEY(`device_id`) REFERENCES `charge_device` (`device_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
 
 
 DROP TABLE IF EXISTS `charge_price`;
 CREATE TABLE `charge_price` (
-  `charge_price_id` int(10) NOT NULL AUTO_INCREASE,
+  `charge_price_id` int(10) NOT NULL AUTO_INCREMENT,
   `public` varchar(20) NOT NULL,
   `season` varchar(20) NOT NULL,
   `load` varchar(20) NOT NULL,
@@ -150,7 +150,7 @@ CREATE TABLE `charge_price` (
 
 DROP TABLE IF EXISTS `content`;
 CREATE TABLE `content` (
-  `content_id` int(10) NOT NULL AUTO_INCREASE,
+  `content_id` int(10) NOT NULL AUTO_INCREMENT,
   `usage` varchar(20) NOT NULL, -- FK Name
   `usage_id` int(10) NOT NULL, -- FK Index
   `content_url` varchar(255) NOT NULL,
@@ -160,7 +160,7 @@ CREATE TABLE `content` (
 
 DROP TABLE IF EXISTS `notice_board`;
 CREATE TABLE `notice_board` (
-  `notice_id` int(10) NOT NULL AUTO_INCREASE,
+  `notice_id` int(10) NOT NULL AUTO_INCREMENT,
   `title` varchar(50) NOT NULL,
   `context` varchar(255) NOT NULL,
   `date` datetime NOT NULL,
@@ -170,7 +170,7 @@ CREATE TABLE `notice_board` (
 
 DROP TABLE IF EXISTS `FAQ_board`;
 CREATE TABLE `FAQ_board` (
-  `FAQ_id` int(10) NOT NULL AUTO_INCREASE,
+  `FAQ_id` int(10) NOT NULL AUTO_INCREMENT,
   `title` varchar(50) NOT NULL,
   `context` varchar(255) NOT NULL,
   PRIMARY KEY (`FAQ_id`)
@@ -179,7 +179,7 @@ CREATE TABLE `FAQ_board` (
 
 DROP TABLE IF EXISTS `inquiry_board`;
 CREATE TABLE `inquiry_board` (
-  `inquiry_id` int(10) NOT NULL AUTO_INCREASE,
+  `inquiry_id` int(10) NOT NULL AUTO_INCREMENT,
   `uid` int(10) NOT NULL,
   `type` varchar(50) NOT NULL,
   `title` varchar(50) NOT NULL,
@@ -188,13 +188,13 @@ CREATE TABLE `inquiry_board` (
   `status` varchar(20) NOT NULL DEFAULT "",
   PRIMARY KEY (`inquiry_id`),
   KEY `uid_FK` (`uid`),
-  CONSTRAINT `uid_FK` FOREIGN KEY(`uid`) REFERENCES `user` (`uid`)
+  CONSTRAINT `uid_FK4` FOREIGN KEY(`uid`) REFERENCES `user` (`uid`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
 
 
 DROP TABLE IF EXISTS `review_board`;
 CREATE TABLE `review_board` (
-  `review_id` int(10) NOT NULL AUTO_INCREASE,
+  `review_id` int(10) NOT NULL AUTO_INCREMENT,
   `uid` int(10) NOT NULL,
   `station_id` int(10) NOT NULL,
   `star` int(10) NOT NULL,
@@ -203,14 +203,14 @@ CREATE TABLE `review_board` (
   PRIMARY KEY (`review_id`),
   KEY `uid_FK` (`uid`),
   KEY `station_id_FK` (`station_id`),
-  CONSTRAINT `uid_FK` FOREIGN KEY(`uid`) REFERENCES `user` (`uid`),
-  CONSTRAINT `station_id_FK` FOREIGN KEY(`station_id`) REFERENCES `charge_station` (`station_id`)
+  CONSTRAINT `uid_FK5` FOREIGN KEY(`uid`) REFERENCES `user` (`uid`),
+  CONSTRAINT `station_id_FK3` FOREIGN KEY(`station_id`) REFERENCES `charge_station` (`station_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
 
 
 DROP TABLE IF EXISTS `report_board`;
 CREATE TABLE `report_board` (
-  `report_id` int(10) NOT NULL AUTO_INCREASE,
+  `report_id` int(10) NOT NULL AUTO_INCREMENT,
   `uid` int(10) NOT NULL,
   `station_id` int(10) NOT NULL,
   `device_id` int(10) NOT NULL,
@@ -221,14 +221,14 @@ CREATE TABLE `report_board` (
   KEY `uid_FK` (`uid`),
   KEY `station_id_FK` (`station_id`),
   KEY `device_id_FK` (`device_id`),
-  CONSTRAINT `uid_FK` FOREIGN KEY(`uid`) REFERENCES `user` (`uid`),
-  CONSTRAINT `station_id_FK` FOREIGN KEY(`station_id`) REFERENCES `charge_station` (`station_id`),
-  CONSTRAINT `device_id_FK` FOREIGN KEY(`device_id`) REFERENCES `charge_device` (`device_id`)
+  CONSTRAINT `uid_FK6` FOREIGN KEY(`uid`) REFERENCES `user` (`uid`),
+  CONSTRAINT `station_id_FK4` FOREIGN KEY(`station_id`) REFERENCES `charge_station` (`station_id`),
+  CONSTRAINT `device_id_FK2` FOREIGN KEY(`device_id`) REFERENCES `charge_device` (`device_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
 
 DROP TABLE IF EXISTS `company_user`;
 CREATE TABLE `company_user` (
-  `cuid` int(10) NOT NULL AUTO_INCREASE,
+  `cuid` int(10) NOT NULL AUTO_INCREMENT,
   `company_id` int(10) NOT NULL,
   `level` int(10) NOT NULL,
   `id` varchar(50) NOT NULL,
@@ -239,5 +239,5 @@ CREATE TABLE `company_user` (
   `mobile` varchar(20) NOT NULL,
   PRIMARY KEY (`cuid`),
   KEY `company_id_FK` (`company_id`),
-  CONSTRAINT `company_id_FK` FOREIGN KEY(`company_id`) REFERENCES `company` (`company_id`)
+  CONSTRAINT `company_id_FK2` FOREIGN KEY(`company_id`) REFERENCES `company` (`company_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;

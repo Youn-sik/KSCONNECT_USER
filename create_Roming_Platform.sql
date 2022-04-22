@@ -80,7 +80,7 @@ CREATE TABLE `charge_device_status` (
   `stop_end_date` varchar(14) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `cpid_FK` (`cpid`),
-  CONSTRAINT `cpid_FK` FOREIGN KEY(`cpid`) REFERENCES `charge_device` (`cpid`)
+  CONSTRAINT `cpid_FK1` FOREIGN KEY(`cpid`) REFERENCES `charge_device` (`cpid`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
 
 
@@ -97,5 +97,5 @@ CREATE TABLE `charge_device_reserv` (
   `charge_yn` varchar(1) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `cpid_FK` (`cpid`),
-  CONSTRAINT `cpid_FK` FOREIGN KEY(`cpid`) REFERENCES `charge_device` (`cpid`)
+  CONSTRAINT `cpid_FK2` FOREIGN KEY(`cpid`) REFERENCES `charge_device` (`cpid`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
