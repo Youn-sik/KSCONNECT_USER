@@ -38,6 +38,7 @@ DROP TABLE IF EXISTS `company`;
 CREATE TABLE `company` (
   `company_id` int(10) NOT NULL AUTO_INCREASE,
   `name` varchar(50) NOT NULL,
+  `company_number` varchar(10) NOT NULL,
   PRIMARY KEY (`company_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
 
@@ -109,12 +110,23 @@ CREATE TABLE `charge_record` (
   `uid` int(10) NOT NULL,
   `station_id` int(10) NOT NULL,
   `device_id` int(10) NOT NULL,
-  `used_amount` int(20) NOT NULL,
-  `charge_amount` int(20) NOT NULL,
+  `emaid` varchar(20) NOT NULL,
   `status` varchar(20) NOT NULL,
   `pay_method` varchar(50) NOT NULL,
   `pay_status` varchar(50) NOT NULL,
-  `date` datetime NOT NULL,
+  `charge_st_date` datetime NOT NULL,
+  `charge_end_date` datetime NOT NULL,
+  `charge_kwh` varchar(20) NOT NULL,
+  `charge_kwh1` varchar(20) NOT NULL,
+  `charge_kwh2` varchar(20) NOT NULL,
+  `charge_kwh3` varchar(20) NOT NULL,
+  `charge_amt` varchar(20) NOT NULL,
+  `charge_amt1` varchar(20) NOT NULL,
+  `charge_amt2` varchar(20) NOT NULL,
+  `charge_amt3` varchar(20) NOT NULL,
+  `sp_ucost1` varchar(20) NOT NULL,
+  `sp_ucost2` varchar(20) NOT NULL,
+  `sp_ucost3` varchar(20) NOT NULL,
   PRIMARY KEY (`product_record_id`),
   KEY `uid_FK` (`uid`),
   KEY `station_id_FK` (`station_id`),
@@ -212,4 +224,20 @@ CREATE TABLE `report_board` (
   CONSTRAINT `uid_FK` FOREIGN KEY(`uid`) REFERENCES `user` (`uid`),
   CONSTRAINT `station_id_FK` FOREIGN KEY(`station_id`) REFERENCES `charge_station` (`station_id`),
   CONSTRAINT `device_id_FK` FOREIGN KEY(`device_id`) REFERENCES `charge_device` (`device_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS `company_user`;
+CREATE TABLE `company_user` (
+  `cuid` int(10) NOT NULL AUTO_INCREASE,
+  `company_id` int(10) NOT NULL,
+  `level` int(10) NOT NULL,
+  `id` varchar(50) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `name` varchar(20) NOT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `email` varchar(50) NOT NULL,
+  `mobile` varchar(20) NOT NULL,
+  PRIMARY KEY (`cuid`),
+  KEY `company_id_FK` (`company_id`),
+  CONSTRAINT `company_id_FK` FOREIGN KEY(`company_id`) REFERENCES `company` (`company_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
