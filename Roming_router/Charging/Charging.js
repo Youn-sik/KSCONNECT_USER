@@ -3,6 +3,11 @@ const router = express.Router()
 const axios = require("axios")
 const schedule = require("node-schedule")
 const kepco_info = require("../../RomingInfo.json")
+const mysqlConn = require("../../database_conn")
+
+let moment = require('moment');
+require('moment-timezone');
+moment.tz.setDefault("Asia/Seoul");
 
 const header_json = {
     "Content-Type": "application/json"
@@ -20,6 +25,31 @@ const cs_info_job = schedule.scheduleJob('0 */1 * * * *', async ()=> {
 // const cs_info_job = schedule.scheduleJob('0 0 0 */1 * *', ()=> {
     let result = await cs_info(basic_req_data)
     console.log(result)
+
+    // let testObj = {
+    //     name: "쿨사인",
+    //     company_number: "02-8055-8055",
+    // }
+    // mysqlConn.connectionService.query("INSERT INTO company SET ?", testObj, function(err, rows) {
+    //     if(err) console.error(err)
+    //     console.log(rows)
+    // });
+
+    // let testObj = {
+    //     company_id: 1,
+    //     name: "제 1주차장 현관 앞 충전소",
+    //     status: "Y",
+    //     last_state: moment().format('YYYY-MM-DD HH:mm:ss'),
+    //     address: "서울특별시 구로구 디지털로27바길 27",
+    //     available: "24시간",
+    //     park_fee: "500",
+    //     contect_number: "02-8055-8055",
+    //     pay_type: "신용카드"
+    // }
+    // mysqlConn.connectionService.query("INSERT INTO charge_station SET ?", testObj, function(err, rows) {
+    //     if(err) console.error(err)
+    //     console.log(rows)
+    // });
 })
 
 const cp_info_job = schedule.scheduleJob('0 */1 * * * *', async ()=> {
@@ -80,6 +110,14 @@ async function cs_info(data) {
                     let sigungu = element.sigungu //*시군구코드 (ex: 코드참조)
                     let oper_st_ymd = element.oper_st_ymd //*서비스운영 시작일자 (ex: 20200820)
                     let oper_end_ymd = element.oper_end_ymd //*서비스운영 종료일자 (ex: 99991231)
+
+                    // let process_data = element;
+                    // process_data.update_time = moment().format('YYYY-MM-DD HH:mm:ss');
+
+                    // mysqlConn.connectionRoming.query("INSERT INTO charge_station SET ?", process_data, function(err, rows) {
+                    //     if(err) console.error(err)
+                    //     console.log(rows)
+                    // });
 
                     //처리 결과
                     if(result == 1) { //요청처리 일부 정상완료

@@ -2,7 +2,7 @@ DROP TABLE IF EXISTS `company`;
 CREATE TABLE `company` (
   `company_id` int(10) NOT NULL AUTO_INCREMENT,
   `name` varchar(50) NOT NULL,
-  `company_number` varchar(10) NOT NULL,
+  `company_number` varchar(20) NOT NULL,
   PRIMARY KEY (`company_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
 

@@ -9,5 +9,6 @@
     "mysql_user": "kool",
     "mysql_password": "master",
     "Service_Platform": "Service_Platform",
-    "Roming_Platform": "Roming_Platform"
+    "Roming_Platform": "Roming_Platform",
+    "Service_Session": "Service_Session"
 }
