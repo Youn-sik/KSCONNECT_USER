@@ -4,5 +4,10 @@
     "spkey": "KRKSIB4xCiSx7SbPBsuUBbwnP",
     "provider_id": "KSI, 조회 회원사",
     "kepco_host": "172.16.38.157",
-    "kepco_port": "0000"
+    "kepco_port": "0000",
+    "mysql_host": "127.0.0.1",
+    "mysql_user": "kool",
+    "mysql_password": "master",
+    "Service_Platform": "Service_Platform",
+    "Roming_Platform": "Roming_Platform"
 }
