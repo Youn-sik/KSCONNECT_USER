@@ -30,7 +30,7 @@ const cs_info_job = schedule.scheduleJob('0 */1 * * * *', async ()=> {
     //     name: "쿨사인",
     //     company_number: "02-8055-8055",
     // }
-    // mysqlConn.connectionService.query("INSERT INTO company SET ?", testObj, function(err, rows) {
+    // mysqlConn.connectionService.query("INSERT INTO company SET ?", testObj, async (err, rows) {
     //     if(err) console.error(err)
     //     console.log(rows)
     // });
@@ -46,7 +46,7 @@ const cs_info_job = schedule.scheduleJob('0 */1 * * * *', async ()=> {
     //     contect_number: "02-8055-8055",
     //     pay_type: "신용카드"
     // }
-    // mysqlConn.connectionService.query("INSERT INTO charge_station SET ?", testObj, function(err, rows) {
+    // mysqlConn.connectionService.query("INSERT INTO charge_station SET ?", testObj, async (err, rows) {
     //     if(err) console.error(err)
     //     console.log(rows)
     // });
