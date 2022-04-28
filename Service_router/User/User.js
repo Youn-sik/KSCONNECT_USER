@@ -10,24 +10,25 @@ router.post("/login", (request, response)=> {
             if(err) {
                 console.error(err)
                 response.status(400).send({result: false, errStr: "로그인 중 데이터베이스 에러가 발생하였습니다."})
-            }
-            if(password === rows[0].password) {
-                if(request.session.user) {
-                    console.log(request.session)
-                    response.status(400).send({result: true, errStr: ""})
-                } else {
-                    request.session.user = {
-                        uid: rows[0].uid,
-                        id: rows[0].id,
-                        password: rows[0].password,
-                        name: rows[0].name,
-                        auth: true
-                    }
-                    console.log(request.session)
-                    response.send({result: true, errStr: ""})
-                }
             } else {
-                response.status(400).send({result: false, errStr: "존재하지 않는 계정입니다."})
+                if(password === rows[0].password) {
+                    if(request.session.user) {
+                        console.log(request.session)
+                        response.status(400).send({result: true, errStr: ""})
+                    } else {
+                        request.session.user = {
+                            uid: rows[0].uid,
+                            id: rows[0].id,
+                            password: rows[0].password,
+                            name: rows[0].name,
+                            auth: true
+                        }
+                        console.log(request.session)
+                        response.send({result: true, errStr: ""})
+                    }
+                } else {
+                    response.status(400).send({result: false, errStr: "존재하지 않는 계정입니다."})
+                }
             }
         })
     } catch(err) {
@@ -89,11 +90,11 @@ router.post("/signup", (request, response)=> {
             if(err) {
                 console.error(err)
                 response.status(400).send({result: false, errStr: "회원 가입 중 문제가 발생하였습니다."})
+            } else {
+                console.log(rows)
+                response.send({result: true, errStr: ""})
             }
-            console.log(rows)
-            response.send({result: true, errStr: ""})
         });
-
     } catch(err) {
         console.error(err)
         response.status(400).send({result: false, errStr:"잘못된 형식 입니다."})
@@ -112,9 +113,10 @@ router.put("/edit", (request, response)=> {
             if(err) {
                 console.error(err)
                 response.status(400).send({result: false, errStr: "회원 정보 수정 중 문제가 발생하였습니다."})
+            } else {
+                console.log(rows)
+                response.send({result: true, errStr: ""})
             }
-            console.log(rows)
-            response.send({result: true, errStr: ""})
         });
         // */
 
@@ -168,26 +170,26 @@ router.get("/point_record", (request, response)=> {
             if(err) {
                 console.error(err)
                 response.status(400).send({result: false, errStr: "상품 구매 내역 조회중 문제가 발생하였습니다.", product_record: []})
+            } else {
+                console.log(rows)
+                let point_record = []
+                let iter = 1
+                rows.forEach((element, _) => {
+                    // 쪼인한 데이터를 여기서 오프젝트로 정리해서 배열로 푸시
+                    let point_record_obj = {
+                        index: iter,
+                        name: element.name,
+                        status: element.status,
+                        current_point: element.current_point,
+                        calculate_point: element.calculate_point,
+                        remain_point: element.remain_point,
+                        date: element.date,
+                    }
+                    point_record.push(point_record_obj)
+                    iter++
+                });
+                response.send({result: true, errStr: "", point_record: point_record})
             }
-
-            console.log(rows)
-            let point_record = []
-            let iter = 1
-            rows.forEach((element, _) => {
-                // 쪼인한 데이터를 여기서 오프젝트로 정리해서 배열로 푸시
-                let point_record_obj = {
-                    index: iter,
-                    name: element.name,
-                    status: element.status,
-                    current_point: element.current_point,
-                    calculate_point: element.calculate_point,
-                    remain_point: element.remain_point,
-                    date: element.date,
-                }
-                point_record.push(point_record_obj)
-                iter++
-            });
-            response.send({result: true, errStr: "", point_record: point_record})
         })
     } catch(err) {
         console.error(err)

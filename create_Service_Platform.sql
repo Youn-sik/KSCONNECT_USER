@@ -143,8 +143,9 @@ CREATE TABLE `charge_price` (
   `charge_price_id` int(10) NOT NULL AUTO_INCREMENT,
   `public` varchar(20) NOT NULL,
   `season` varchar(20) NOT NULL,
-  `load` varchar(20) NOT NULL,
+  `power` varchar(20) NOT NULL,
   `kw100` varchar(20) NOT NULL,
+  `price` float(20) NOT NULL DEFAULT 0,
   PRIMARY KEY (`charge_price_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
 
