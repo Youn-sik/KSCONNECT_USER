@@ -17,6 +17,7 @@ const Roming_Etc = require("./Roming_router/Etc/Etc")
 
 const Index = require("./Service_router/Index")
 const Service_User = require("./Service_router/User/User")
+const Service_Product = require("./Service_router/Product/Product")
 
 // const mysqlStoreOption = {
 //     host: kepco_info.mysql_host,
@@ -100,6 +101,7 @@ app.use(
 
 app.use("/", Index)
 app.use("/user", Service_User)
+app.use("/product", Service_Product)
 
 app.listen("4000", ()=> {
     console.log("[SERVER] > Backend application is listening on port: "+ 4000)
