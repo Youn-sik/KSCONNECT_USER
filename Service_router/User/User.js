@@ -7,22 +7,24 @@ router.post("/login", (request, response)=> {
         let id = request.body.id
         let password  = request.body.password
         mysqlConn.connectionService.query("select * from user where id = ?", id, (err, rows)=> {
-            if(err) console.error(err)
+            if(err) {
+                console.error(err)
+                response.status(400).send({result: false, errStr: "로그인 중 데이터베이스 에러가 발생하였습니다."})
+            }
             if(password === rows[0].password) {
                 if(request.session.user) {
                     console.log(request.session)
-                    response.send("세션이 존재하여 메인페이지로 이동")
-                    // response.redirect("/app/dashboards/default")
+                    response.status(400).send({result: true, errStr: ""})
                 } else {
                     request.session.user = {
+                        uid: rows[0].uid,
                         id: rows[0].id,
                         password: rows[0].password,
                         name: rows[0].name,
                         auth: true
                     }
                     console.log(request.session)
-                    response.send("세션 생성 후 메인페이지로 이동")
-                    // response.redirect("/app/dashboards/default")
+                    response.send({result: true, errStr: ""})
                 }
             } else {
                 response.status(400).send({result: false, errStr: "존재하지 않는 계정입니다."})
@@ -41,15 +43,13 @@ router.get("/logout", (request, response)=> {
             request.session.destroy(err=> {
                 if(err) {
                     console.err("[SERVER] > 세션 삭제 중 에러 발생.")
-                    return;
+                    response.status(400).send({result: false, errStr: "로그아웃 중 세션 에러가 발생하였습니다."})
                 }
-                response.send("세션 파괴 완료 후 로그인 페이지로 이동")
-                // response.redirect("/app/login_path")
+                response.send({result: true, errStr: ""})
             })
         } else {
             console.log(request.session)
-            response.send("세션이 없습니다.")
-            // response.redirect("/app/login_path")
+            response.send({result: false, errStr: "세션이 없습니다."})
         }
     } catch(err) {
         console.error(err)
@@ -64,13 +64,12 @@ router.post("/signup", (request, response)=> {
         let name = request.body.name
         let email = request.body.email
         let mobile = request.body.mobile
-        let address = request.body.address// ? request.body.address : null
+        let address = request.body.address
         let car_model = request.body.car_model
         let car_number = request.body.car_number
-        let payment_card_company = request.body.payment_card_company// ? request.body.payment_card_company : null
-        let payment_card_number = request.body.payment_card_number// ? request.body.payment_card_number : null
-        let membership_card_number = request.body.membership_card_number// ? request.body.membership_card_number : null
-        let point = 0
+        let payment_card_company = request.body.payment_card_company
+        let payment_card_number = request.body.payment_card_number
+        let membership_card_number = request.body.membership_card_number
 
         const sign_obj = {
             id: id,
@@ -84,7 +83,6 @@ router.post("/signup", (request, response)=> {
             payment_card_company: payment_card_company,
             payment_card_number: payment_card_number,
             membership_card_number: membership_card_number,
-            point: point
         }
 
         mysqlConn.connectionService.query("INSERT INTO user SET ?", sign_obj, (err, rows)=> {
@@ -93,7 +91,7 @@ router.post("/signup", (request, response)=> {
                 response.status(400).send({result: false, errStr: "회원 가입 중 문제가 발생하였습니다."})
             }
             console.log(rows)
-            response.send({result: true})
+            response.send({result: true, errStr: ""})
         });
 
     } catch(err) {
@@ -108,21 +106,17 @@ router.put("/edit", (request, response)=> {
         // 변경 할 데이터만 받기
         const update_obj = {}
 
-        for (const key in request.body) {
-            update_obj[key] = request.body[key]
-        }
-        console.log(update_obj)
-
-        mysqlConn.connectionService.query("UPDATE user SET ? where id = ?", [update_obj, request.session.user.id], (err, rows)=> {
+        for (const key in request.body) update_obj[key] = request.body[key]
+        
+        mysqlConn.connectionService.query("UPDATE user SET ? where uid = ?", [update_obj, request.session.user.uid], (err, rows)=> {
             if(err) {
                 console.error(err)
                 response.status(400).send({result: false, errStr: "회원 정보 수정 중 문제가 발생하였습니다."})
             }
             console.log(rows)
-            response.send({result: true})
+            response.send({result: true, errStr: ""})
         });
         // */
-            
 
         /*
         // 변경 할 데이터 및 기존 데이터 모두 받기
@@ -162,6 +156,39 @@ router.put("/edit", (request, response)=> {
         });
         */
 
+    } catch(err) {
+        console.error(err)
+        response.status(400).send({result: false, errStr:"잘못된 형식 입니다."})
+    }
+})
+
+router.get("/point_record", (request, response)=> {
+    try {
+        mysqlConn.connectionService.query("select * from point_record inner join user on point_record.uid = user.uid where user.uid = ?", request.session.user.uid, (err, rows)=> {
+            if(err) {
+                console.error(err)
+                response.status(400).send({result: false, errStr: "상품 구매 내역 조회중 문제가 발생하였습니다.", product_record: []})
+            }
+
+            console.log(rows)
+            let point_record = []
+            let iter = 1
+            rows.forEach((element, _) => {
+                // 쪼인한 데이터를 여기서 오프젝트로 정리해서 배열로 푸시
+                let point_record_obj = {
+                    index: iter,
+                    name: element.name,
+                    status: element.status,
+                    current_point: element.current_point,
+                    calculate_point: element.calculate_point,
+                    remain_point: element.remain_point,
+                    date: element.date,
+                }
+                point_record.push(point_record_obj)
+                iter++
+            });
+            response.send({result: true, errStr: "", point_record: point_record})
+        })
     } catch(err) {
         console.error(err)
         response.status(400).send({result: false, errStr:"잘못된 형식 입니다."})
