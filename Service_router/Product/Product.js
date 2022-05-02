@@ -27,7 +27,7 @@ router.get("/list", (request, response)=> {
     }
 })
 
-router.post("/create", (request, response)=> {
+router.post("/register", (request, response)=> {
     try {
         let title = request.body.title
         let context = request.body.context
@@ -44,7 +44,6 @@ router.post("/create", (request, response)=> {
                 console.error(err)
                 response.status(400).send({result: false, errStr: "상품 등록중 문제가 발생하였습니다."})
             } else {
-                console.log(rows)
                 response.send({result: true, errStr: ""})
             }
 

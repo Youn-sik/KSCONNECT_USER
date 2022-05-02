@@ -23,4 +23,38 @@ router.get("/list", (request, response)=> {
     }
 })
 
+router.post("/register", (request, response)=> {
+    try {
+        let name = request.body.name
+        let company_number = request.body.company_number
+
+        const company_obj = {
+            name: name,
+            company_number: company_number
+        }
+
+        mysqlConn.connectionService.query("insert into company set ?", company_obj, (err, rows)=> {
+            if(err) {
+                console.error(err)
+                response.status(400).send({result: false, errStr: ""})
+            } else {
+                response.send({result: true, errStr: ""})
+            }
+        })
+
+    } catch(err) {
+        console.error(err)
+        response.status(400).send({result: false, errStr:"잘못된 형식 입니다."})
+    }
+})
+
+router.put("/modify", (request, response)=> {
+    try {
+
+    } catch(err) {
+        console.error(err)
+        response.status(400).send({result: false, errStr:"잘못된 형식 입니다."})
+    }
+})
+
 module.exports = router

@@ -20,6 +20,8 @@ const Service_User = require("./Service_router/User/User")
 const Service_Product = require("./Service_router/Product/Product")
 const Service_Charge_Price = require("./Service_router/Charge_price/Charge_price")
 const Service_Company = require("./Service_router/Company/Company")
+const Service_Charge_Station = require("./Service_router/Charge_station/Charge_station")
+const Service_Charge_Device = require("./Service_router/Charge_device/Charge_device")
 
 // const mysqlStoreOption = {
 //     host: kepco_info.mysql_host,
@@ -106,6 +108,8 @@ app.use("/user", Service_User)
 app.use("/product", Service_Product)
 app.use("/charge_price", Service_Charge_Price)
 app.use("/company", Service_Company)
+app.use("/charge_station", Service_Charge_Station)
+app.use("/charge_device", Service_Charge_Device)
 
 app.listen("4000", ()=> {
     console.log("[SERVER] > Backend application is listening on port: "+ 4000)

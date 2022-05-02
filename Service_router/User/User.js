@@ -197,4 +197,75 @@ router.get("/point_record", (request, response)=> {
     }
 })
 
+router.get("/charge_record", (request, response)=> {
+    try {
+        mysqlConn.connectionService.query("select charge_record_id, charge_record.uid, charge_record.station_id, charge_record.device_id, " +
+        "emaid, charge_record.status, pay_method, pay_status, charge_record.car_model, charge_record.car_number, charge_record.pay_card_company, " +
+        "charge_record.pay_card_number, charge_st_date, charge_end_date, charge_kwh, charge_kwh1, charge_kwh2, charge_kwh3, charge_amt, " +
+        "charge_amt1, charge_amt2, charge_amt3, sp_ucost1, sp_ucost2, sp_ucost3, charge_record.charge_type, charge_record.charge_way, " +
+        "user.id as user_id, user.name as user_name, user.point as user_point, "+
+        "charge_station.name as charge_station_name, charge_station.address as charge_station_address, " +
+        "charge_device.name as charge_device_name, charge_device.device_number as charge_device_device_number "+
+        "from charge_record inner join user on charge_record.uid = user.uid " +
+        "inner join charge_station on charge_record.station_id = charge_station.station_id inner join charge_device " +
+        "on charge_record.device_id = charge_device.device_id where charge_record.uid = ?", request.session.user.uid, (err, rows)=> {
+            if(err) {
+                console.error(err)
+                response.status(400).send({result: false, errStr: "충전 내역 조회중 문제가 발생하였습니다.", charge_records: []})
+            } else {
+                let charge_records = []
+                rows.forEach((element, _) => {
+                    let charge_record_obj = {
+                        charge_record_id: element.charge_record_id,
+                        uid: element.uid,
+                        station_id: element.station_id,
+                        device_id: element.device_id,
+                        emaid: element.emaid,
+                        status: element.status,
+                        pay_method: element.pay_method,
+                        pay_status: element.pay_status,
+                        car_model: element.car_model,
+                        car_number: element.car_number,
+                        pay_card_company: element.pay_card_company,
+                        pay_card_number: element.pay_card_number,
+                        charge_st_date: element.charge_st_date,
+                        charge_end_date: element.charge_end_date,
+                        charge_kwh: element.charge_kwh,
+                        charge_kwh1: element.charge_kwh1,
+                        charge_kwh2: element.charge_kwh2,
+                        charge_kwh3: element.charge_kwh3,
+                        charge_amt: element.charge_amt,
+                        charge_amt1: element.charge_amt1,
+                        charge_amt2: element.charge_amt2,
+                        charge_amt3: element.charge_amt3,
+                        sp_ucost1: element.sp_ucost1,
+                        sp_ucost2: element.sp_ucost2,
+                        sp_ucost3: element.sp_ucost3,
+                        charge_type: element.charge_type,
+                        charge_way: element.charge_way,
+                        user_info: {
+                            user_id: element.user_id,
+                            user_name: element.user_name,
+                            user_point: element.user_point
+                        },
+                        charge_station_info: {
+                            charge_station_name: element.charge_station_name,
+                            charge_station_address: element.charge_station_address
+                        },
+                        charge_device_info: {
+                            charge_device_name: element.charge_device_name,
+                            charge_device_device_number: element.charge_device_device_number
+                        }
+                    }
+                    charge_records.push(charge_record_obj)
+                });
+                response.send({result: true, errStr: "", charge_records: charge_records})
+            }
+        })
+    } catch(err) {
+        console.error(err)
+        response.status(400).send({result: false, errStr:"잘못된 형식 입니다."})
+    }
+})
+
 module.exports = router
