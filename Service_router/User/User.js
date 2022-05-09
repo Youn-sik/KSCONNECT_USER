@@ -6,6 +6,7 @@ router.post("/login", (request, response)=> {
     try {
         let id = request.body.id
         let password  = request.body.password
+        console.log(request.body)
         mysqlConn.connectionService.query("select * from user where id = ?", id, (err, rows)=> {
             if(err) {
                 console.error(err)
@@ -23,8 +24,23 @@ router.post("/login", (request, response)=> {
                             name: rows[0].name,
                             auth: true
                         }
-                        console.log(request.session)
-                        response.send({result: true, errStr: ""})
+                        // console.log(request.session)
+
+                        console.log(rows[0])
+                        user_info = {
+                            id: rows[0].id,
+                            name: rows[0].name,
+                            email: rows[0].email,
+                            mobile: rows[0].mobile,
+                            address: rows[0].address,
+                            car_model: rows[0].car_model,
+                            car_number: rows[0].car_number,
+                            payment_card_company: rows[0].payment_card_company,
+                            payment_card_number: rows[0].payment_card_number,
+                            membership_card_number: rows[0].membership_card_number,
+                            point: rows[0].point
+                        }
+                        response.send({result: true, errStr: "", user_info: user_info})
                     }
                 } else {
                     response.status(400).send({result: false, errStr: "존재하지 않는 계정입니다."})
@@ -43,7 +59,7 @@ router.get("/logout", (request, response)=> {
             console.log(request.session)
             request.session.destroy(err=> {
                 if(err) {
-                    console.err("[SERVER] > 세션 삭제 중 에러 발생.")
+                    console.error("[SERVER] > 세션 삭제 중 에러 발생.")
                     response.status(400).send({result: false, errStr: "로그아웃 중 세션 에러가 발생하였습니다."})
                 }
                 response.send({result: true, errStr: ""})

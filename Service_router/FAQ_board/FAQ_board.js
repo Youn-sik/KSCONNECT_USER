@@ -22,7 +22,7 @@ router.get("/list", (request, response)=> {
             }
         })
     } catch(err) {
-        console.err(err)
+        console.error(err)
         response.status(400).send({result: false, errStr: "잘못된 형식 입니다.", FAQs: []})
     }
 })
@@ -46,7 +46,7 @@ router.post("/register", (request, response)=> {
             }
         })
     } catch(err) {
-        console.err(err)
+        console.error(err)
         response.status(400).send({result: false, errStr: "잘못된 형식 입니다."})
     }
 })
@@ -71,7 +71,7 @@ router.put("/modify", (request, response)=> {
             }
         })
     } catch(err) {
-        console.err(err)
+        console.error(err)
         response.status(400).send({result: false, errStr: "잘못된 형식 입니다."})
     }
 })
@@ -89,7 +89,7 @@ router.delete("/delete", (request, response)=> {
             }
         })
     } catch(err) {
-        console.err(err)
+        console.error(err)
         response.status(400).send({result: false, errStr: "잘못된 형식 입니다."})
     }
 })
