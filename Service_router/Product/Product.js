@@ -56,7 +56,7 @@ router.post("/register", (request, response)=> {
 
 router.post("/buy", (request, response)=> {
     try {
-        let uid = request.session.user.uid
+        let uid = request.decoded.uid
         // 결재 정보?
         let product_id = request.body.product_id
         let product_price = request.body.product_price
@@ -94,7 +94,7 @@ router.post("/buy", (request, response)=> {
                     }),
                     new Promise((resolve, reject)=> {
                         // 포인트 내역 추가를 위한 사용자 정보 조회
-                        mysqlConn.connectionService.query("select * from user where uid = ?", request.session.user.uid, (error, user_rows)=> {
+                        mysqlConn.connectionService.query("select * from user where uid = ?", request.decoded.uid, (error, user_rows)=> {
                             if(error) {
                                 console.error(error)
                                 reject()
@@ -116,7 +116,7 @@ router.post("/buy", (request, response)=> {
                                         reject()
                                     } else {
                                         // 포인트 갱신
-                                        mysqlConn.connectionService.query("update user set point = ? where uid = ?", [remain_point, request.session.user.uid], (error, user_update_rows)=> {
+                                        mysqlConn.connectionService.query("update user set point = ? where uid = ?", [remain_point, request.decoded.uid], (error, user_update_rows)=> {
                                             if(error) {
                                                 console.error(error)
                                                 reject()
@@ -146,7 +146,7 @@ router.post("/buy", (request, response)=> {
 router.get("/record", (request, response)=> {
     try {
         mysqlConn.connectionService.query("select * from product_record inner join user on product_record.uid = user.uid "+
-        "inner join product on product.product_id = product_record.product_id where user.uid = ?", request.session.user.uid, (err, rows)=> {
+        "inner join product on product.product_id = product_record.product_id where user.uid = ?", request.decoded.uid, (err, rows)=> {
             if(err) {
                 console.error(err)
                 response.status(400).send({result: false, errStr: "상품 구매 내역 조회중 문제가 발생하였습니다.", product_record: []})

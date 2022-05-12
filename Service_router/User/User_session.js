@@ -1,13 +1,11 @@
 const express = require("express")
 const router = express.Router()
 const mysqlConn = require("../../database_conn")
-const jwt = require("jsonwebtoken")
 
 router.post("/login", (request, response)=> {
     try {
         let id = request.body.id
         let password  = request.body.password
-        
         console.log(request.body)
         mysqlConn.connectionService.query("select * from user where id = ?", id, (err, rows)=> {
             if(err) {
@@ -15,26 +13,38 @@ router.post("/login", (request, response)=> {
                 response.status(400).send({result: false, errStr: "로그인 중 데이터베이스 에러가 발생하였습니다."})
             } else {
                 if(password === rows[0].password) {
-                    const uid = rows[0].uid
-                    const token = jwt.sign({
-                        uid
-                    }, "cho", {
-                        expiresIn: "1h"
-                    })
-                    const user_info = {
-                        id: rows[0].id,
-                        name: rows[0].name,
-                        email: rows[0].email,
-                        mobile: rows[0].mobile,
-                        address: rows[0].address,
-                        car_model: rows[0].car_model,
-                        car_number: rows[0].car_number,
-                        payment_card_company: rows[0].payment_card_company,
-                        payment_card_number: rows[0].payment_card_number,
-                        membership_card_number: rows[0].membership_card_number,
-                        point: rows[0].point,
+                    if(request.session.user) {
+                        console.log(request.session)
+                        response.status(400).send({result: true, errStr: ""})
+                    } else {
+                        request.session.user = {
+                            uid: rows[0].uid,
+                            id: rows[0].id,
+                            password: rows[0].password,
+                            name: rows[0].name,
+                            auth: true
+                        }
+                        console.log(request.session)
+
+                        // console.log(rows[0])
+                        user_info = {
+                            id: rows[0].id,
+                            name: rows[0].name,
+                            email: rows[0].email,
+                            mobile: rows[0].mobile,
+                            address: rows[0].address,
+                            car_model: rows[0].car_model,
+                            car_number: rows[0].car_number,
+                            payment_card_company: rows[0].payment_card_company,
+                            payment_card_number: rows[0].payment_card_number,
+                            membership_card_number: rows[0].membership_card_number,
+                            point: rows[0].point
+                        }
+                        // console.log(request.session.id)
+                        request.session.save(()=> {
+                            response.send({result: true, errStr: "", user_info: user_info, session_id: request.session.id})
+                        })
                     }
-                    response.send({result: true, errStr: "", user_info: user_info, token: token})
                 } else {
                     response.status(400).send({result: false, errStr: "존재하지 않는 계정입니다."})
                 }
@@ -48,7 +58,19 @@ router.post("/login", (request, response)=> {
 
 router.get("/logout", (request, response)=> {
     try {
-        response.send({result: true, errStr: ""})
+        if(request.session.user) {
+            console.log(request.session)
+            request.session.destroy(err=> {
+                if(err) {
+                    console.error("[SERVER] > 세션 삭제 중 에러 발생.")
+                    response.status(400).send({result: false, errStr: "로그아웃 중 세션 에러가 발생하였습니다."})
+                }
+                response.send({result: true, errStr: ""})
+            })
+        } else {
+            console.log(request.session)
+            response.send({result: false, errStr: "세션이 없습니다."})
+        }
     } catch(err) {
         console.error(err)
         response.status(400).send({result: false, errStr:"잘못된 형식 입니다."})
@@ -106,7 +128,7 @@ router.put("/edit", (request, response)=> {
 
         for (const key in request.body) update_obj[key] = request.body[key]
         
-        mysqlConn.connectionService.query("UPDATE user SET ? where uid = ?", [update_obj, request.decoded.uid], (err, rows)=> {
+        mysqlConn.connectionService.query("UPDATE user SET ? where uid = ?", [update_obj, request.session.user.uid], (err, rows)=> {
             if(err) {
                 console.error(err)
                 response.status(400).send({result: false, errStr: "회원 정보 수정 중 문제가 발생하였습니다."})
@@ -145,7 +167,7 @@ router.put("/edit", (request, response)=> {
             membership_card_number: membership_card_number
         }
 
-        mysqlConn.connectionService.query("UPDATE user SET ? where id = ?", [update_obj, request.decoded.id], (err, rows)=> {
+        mysqlConn.connectionService.query("UPDATE user SET ? where id = ?", [update_obj, request.session.user.id], (err, rows)=> {
             if(err) {
                 console.error(err)
                 response.status(400).send({result: false, errStr: "회원 정보 수정 중 문제가 발생하였습니다."})
@@ -163,7 +185,7 @@ router.put("/edit", (request, response)=> {
 
 router.get("/point_record", (request, response)=> {
     try {
-        mysqlConn.connectionService.query("select * from point_record inner join user on point_record.uid = user.uid where user.uid = ?", request.decoded.uid, (err, rows)=> {
+        mysqlConn.connectionService.query("select * from point_record inner join user on point_record.uid = user.uid where user.uid = ?", request.session.user.uid, (err, rows)=> {
             if(err) {
                 console.error(err)
                 response.status(400).send({result: false, errStr: "상품 구매 내역 조회중 문제가 발생하였습니다.", product_record: []})
@@ -205,7 +227,7 @@ router.get("/charge_record", (request, response)=> {
         "charge_device.name as charge_device_name, charge_device.device_number as charge_device_device_number "+
         "from charge_record inner join user on charge_record.uid = user.uid " +
         "inner join charge_station on charge_record.station_id = charge_station.station_id inner join charge_device " +
-        "on charge_record.device_id = charge_device.device_id where charge_record.uid = ?", request.decoded.uid, (err, rows)=> {
+        "on charge_record.device_id = charge_device.device_id where charge_record.uid = ?", request.session.user.uid, (err, rows)=> {
             if(err) {
                 console.error(err)
                 response.status(400).send({result: false, errStr: "충전 내역 조회중 문제가 발생하였습니다.", charge_records: []})
