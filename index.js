@@ -2,9 +2,11 @@ const express = require("express")
 const app = express()
 const bodyParser = require("body-parser")
 const cookieParser = require("cookie-parser")
-const session = require("express-session")
-// const mysqlStore = require("express-mysql-session")(session)
+// const session = require("express-session")
+// const fileStore = require("session-file-store")(session)
 const cors = require("cors")
+const jwtAuth = require("./Service_router/middlewares/jwtAuth")
+
 const kepco_info = require("./RomingInfo.json")
 
 const mysqlConn = require("./database_conn")
@@ -24,6 +26,7 @@ const Service_Charge_Station = require("./Service_router/Charge_station/Charge_s
 const Service_Charge_Device = require("./Service_router/Charge_device/Charge_device")
 const Service_Notice_Board = require("./Service_router/Notice_board/Notice_board")
 const Service_FAQ_Board = require("./Service_router/FAQ_board/FAQ_board")
+const Service_Inquiry_Board = require("./Service_router/Inquiry_Board/Inquiry_Board")
 
 // const mysqlStoreOption = {
 //     host: kepco_info.mysql_host,
@@ -83,21 +86,28 @@ mysqlConn.connectionRoming.on('error', err=> {
 // const sessionStore = new mysqlStore(mysqlStoreOption);
 
 app.use(cors({origin: true, credentials: true}))
+// app.use(cors({origin: "http://172.16.135.135:3000", credentials: true}))
+app.use(cookieParser())
+// app.use(
+//     session({
+//         // key: "login_session",
+//         // httpOnly: true,
+//         // httpOnly: false,
+//         secret: "cho",
+//         resave: false,
+//         saveUninitialized: true,
+//         // cookie: {
+//         //     // httpOnly: true,
+//         //     httpOnly: false,
+//         //     expires: 1000*60*60,
+//         //     sameSite: "none"
+//         // },
+//         // store: new fileStore()
+//   })
+// )
 app.use(bodyParser.urlencoded({extended: false}))
 app.use(bodyParser.json())
-app.use(cookieParser())
-app.use(
-    session({
-        // key: "login_session",
-        secret: "cho",
-        resave: false,
-        saveUninitialized: true,
-        cookie: {
-            expires: 1000*60*60
-        }
-        // store: sessionStore
-  })
-)
+app.use(jwtAuth)
 
 // app.use("/evapi/charging", Roming_Charging)
 // app.use("/evapi/user", Roming_User)
@@ -114,6 +124,7 @@ app.use("/charge_station", Service_Charge_Station)
 app.use("/charge_device", Service_Charge_Device)
 app.use("/notice_board", Service_Notice_Board)
 app.use("/FAQ_board", Service_FAQ_Board)
+app.use("/inquiry_board", Service_Inquiry_Board)
 
 app.listen("4000", ()=> {
     console.log("[SERVER] > Backend application is listening on port: "+ 4000)
