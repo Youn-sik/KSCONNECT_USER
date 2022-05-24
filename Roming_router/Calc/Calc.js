@@ -76,7 +76,7 @@ async function calc_info(data) {
             if(result == 0 || result == 1) {
                 //응답데이터(List)
                 let list = res.body.list //*충전기정보List (ex: )
-                list.forEach(element, index => {
+                list.forEach((element, _) => {
                     let spid = element.spid //*회원사ID (ex: KPC, HEC)
                     let trade_spid = element.trade_spid //*충전거래 사업자ID (ex: KPC, HEC)
                     let platform_spid = element.platform_spid //*로밍플랫폼 연계기관ID (ex: KPC(한전) MEC(환경부))
@@ -232,7 +232,7 @@ async function calc_update(data) {
             if(result == 0 || result == 1) {
                 //응답데이터(List)
                 let list = res.body.list //*충전기정보List (ex: )
-                list.forEach(element, index => {
+                list.forEach((element, _) => {
                     let spid = element.spid //회원사ID (ex: KPC, HEC)
                     let trade_spid = element.trade_spid //충전거래 사업자ID (ex: KPC, HEC)
                     let platform_spid = element.platform_spid //로밍플랫폼 연계기관ID (ex: KPC(한전) MEC(환경부))
@@ -355,7 +355,7 @@ async function calc_req_info(data) {
             if(result == 0 || result == 1) {
                 //응답데이터(List)
                 let list = res.body.list //*충전기정보List (ex: )
-                list.forEach(element, index => {
+                list.forEach((element, _) => {
                     let spid = element.spid //*회원사ID (ex: KPC, HEC)
                     let trade_spid = element.trade_spid //*충전거래 사업자ID (ex: KPC, HEC)
                     let platform_spid = element.platform_spid //*로밍플랫폼 연계기관ID (ex: KPC(한전) MEC(환경부))
@@ -497,7 +497,7 @@ async function calc_req_update(data) {
             if(result == 0 || result == 1) {
                 //응답데이터(List)
                 let list = res.body.list //*충전기정보List (ex: )
-                list.forEach(element, index => {
+                list.forEach((element, _) => {
                     let spid = element.spid //*회원사ID (ex: KPC, HEC)
                     let trade_spid = element.trade_spid //*충전거래 사업자ID (ex: KPC, HEC)
                     let platform_spid = element.platform_spid //*로밍플랫폼 연계기관ID (ex: KPC(한전) MEC(환경부))
@@ -618,7 +618,7 @@ async function calc_pay_info(data) {
             if(result == 0 || result == 1) {
                 //응답데이터(List)
                 let list = res.body.list //*충전기정보List (ex: )
-                list.forEach(element, index => {
+                list.forEach((element, _) => {
                     let spid = element.spid //*회원사ID (ex: KPC, HEC)
                     let trade_spid = element.trade_spid //*충전거래 사업자ID (ex: KPC, HEC)
                     let platform_spid = element.platform_spid //*로밍플랫폼 연계기관ID (ex: KPC(한전) MEC(환경부))
@@ -758,7 +758,7 @@ async function calc_pay_update(data) {
             if(result == 0 || result == 1) {
                 //응답데이터(List)
                 let list = res.body.list //*충전기정보List (ex: )
-                list.forEach(element, index => {
+                list.forEach((element, _) => {
                     let spid = element.spid //*회원사ID (ex: KPC, HEC)
                     let trade_spid = element.trade_spid //*충전거래 사업자ID (ex: KPC, HEC)
                     let platform_spid = element.platform_spid //*로밍플랫폼 연계기관ID (ex: KPC(한전) MEC(환경부))
@@ -882,7 +882,7 @@ async function cntr_info(data) {
             if(result == 0 || result == 1) {
                 //응답데이터(List)
                 let list = res.body.list //*충전기정보List (ex: )
-                list.forEach(element, index => {
+                list.forEach((element, _) => {
                     let spid = element.spid //*회원사ID (ex: KPC, HEC)
                     let trade_spid = element.trade_spid //*충전거래 사업자ID (ex: KPC, HEC)
                     let platform_spid = element.platform_spid //*로밍플랫폼 연계기관ID (ex: KPC(한전) MEC(환경부))
@@ -1009,7 +1009,7 @@ async function cntr_update(data) {
             if(result == 0 || result == 1) {
                 //응답데이터(List)
                 let list = res.body.list //*충전기정보List (ex: )
-                list.forEach(element, index => {
+                list.forEach((element, _) => {
                     
                     //처리 결과
                     if(result == 1) { //요청처리 일부 정상완료

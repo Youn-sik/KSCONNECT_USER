@@ -37,7 +37,7 @@ async function uid_info(data) {
         .then(res=> {
             let spkey = res.body.spkey //*회원사 연계키 (ex: KRKPCxx..xx)
             let list = res.body.list //*충전소정보 LIST (ex: )
-            list.forEach(element, index => {
+            list.forEach((element, _) => {
                 let spid = element.spid //*회원사업자ID (ex: KPC, HEC)
                 let cardno = element.cardno //*회원카드번호 (ex: 1010010000000000)
                 let emaid = element.emaid //*차량회원번호 (ex: KRKEP8YKV7YZW06)
@@ -196,7 +196,7 @@ async function auth_uid(data) {
             if(result == 0 || result == 1) {
                 //응답데이터(List)
                 let list = res.body.list //*충전기정보List (ex: )
-                list.forEach(element, index => {
+                list.forEach((element, _) => {
                     let auth_id = element.auth_id //*인증요청ID (ex: KPC0000000000001)
                     let provider_id = element.provider_id //*회원가입 사업자ID (ex: KPC, HEC)
                     let cardno = element.cardno //*인증요청 회원카드번호 (ex: 1010010000000000)
@@ -325,7 +325,7 @@ async function auth_qr(data) {
             if(result == 0 || result == 1) {
                 //응답데이터(List)
                 let list = res.body.list //*충전기정보List (ex: )
-                list.forEach(element, index => {
+                list.forEach((element, _) => {
                     let auth_id = element.auth_id //*인증요청ID (ex: KPC0000000000001)
                     let provider_id = element.provider_id //*회원가입 사업자ID (ex: KPC, HEC)
                     let cardno = element.cardno //*인증요청 회원카드번호 (ex: 1010010000000000)
@@ -454,7 +454,7 @@ async function auth_remote_qr(data) {
             if(result == 0 || result == 1) {
                 //응답데이터(List)
                 let list = res.body.list //*충전기정보List (ex: )
-                list.forEach(element, index => {
+                list.forEach((element, _) => {
                     let provider = element.provider //*회원가입 사업자ID (ex: KPC, HEC)
                     let auth_id = element.auth_id //*인증요청ID (ex: KPC0000000000001)
                     let cardno = element.cardno //*인증요청 회원카드번호 (ex: 1010010000000000)
@@ -583,7 +583,7 @@ async function auth_info(data) {
             if(result == 0 || result == 1) {
                 //응답데이터(List)
                 let list = res.body.list //*충전기정보List (ex: )
-                list.forEach(element, index => {
+                list.forEach((element, _) => {
                     let auth_id = element.auth_id //*인증요청ID (ex: KPC0000000000001)
                     let provider_id = element.provider_id //*로밍 사업자ID (ex: KPC, HEC)
                     let cardno = element.cardno //*인증요청 회원카드번호 (ex: 1010010000000000)
@@ -713,7 +713,7 @@ async function auth_update(data) {
             if(result == 0 || result == 1) {
                 //응답데이터(List)
                 let list = res.body.list //*충전기정보List (ex: )
-                list.forEach(element, index => {
+                list.forEach((element, _) => {
                     
                     //처리 결과
                     if(result == 1) { //요청처리 일부 정상완료

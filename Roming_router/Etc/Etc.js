@@ -37,7 +37,7 @@ async function code_info(data) {
             if(result == 0 || result == 1) {
                 //응답데이터(List)
                 let list = res.body.list //*충전기정보List (ex: )
-                list.forEach(element, index => {
+                list.forEach((element, _) => {
                     let cd_tp = element.cd_tp //*코드구분 (ex: CD900)
                     let cd_tp_nm = element.cd_tp_nm //*코드명 (ex: )
                     let cd = element.cd //*코드 (ex: )
@@ -184,7 +184,7 @@ let resultmsg = res.body.resultmsg //*에러내용
 if(result == 0 || result == 1) {
     //응답데이터(List)
     let list = res.body.list //*충전기정보List (ex: )
-    list.forEach(element, index => {
+    list.forEach((element, _) => {
         //
         //응답데이터
         //

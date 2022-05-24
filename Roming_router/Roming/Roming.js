@@ -64,7 +64,7 @@ async function charge_info(data) {
             if(result == 0 || result == 1) {
                 //응답데이터(List)
                 let list = res.body.list //*충전기정보List (ex: )
-                list.forEach(element, index => {
+                list.forEach((element, _) => {
                     let spid = element.spid //회원사ID (ex: KPC, HEC)
                     let trade_spid = element.trade_spid //충전거래 사업자ID (ex: KPC, HEC)
                     let charge_id = element.charge_id //로밍플랫폼 충전내역ID (ex: KPC0000000000001)
@@ -214,7 +214,7 @@ async function charge_status(data) {
             if(result == 0 || result == 1) {
                 //응답데이터(List)
                 let list = res.body.list //*충전기정보List (ex: )
-                list.forEach(element, index => {
+                list.forEach((element, _) => {
                     let spid = element.spid //*회원사ID (ex: KPC, HEC)
                     let trade_spid = element.trade_spid //*충전거래 사업자ID (ex: KPC, HEC)
                     let cardno = element.cardno //*회원카드번호 (ex: 1010010000000000)
@@ -347,7 +347,7 @@ async function charge_status_update(data) {
             if(result == 0 || result == 1) {
                 //응답데이터(List)
                 let list = res.body.list //*충전기정보List (ex: )
-                list.forEach(element, index => {
+                list.forEach((element, _) => {
                     
                     //처리 결과
                     if(result == 1) { //요청처리 일부 정상완료
@@ -462,7 +462,7 @@ async function charge_update(data) {
             if(result == 0 || result == 1) {
                 //응답데이터(List)
                 let list = res.body.list //*충전기정보List (ex: )
-                list.forEach(element, index => {
+                list.forEach((element, _) => {
                     let spid = element.spid //*회원사ID (ex: KPC, HEC)
                     let trade_spid = element.trade_spid //*충전거래 사업자ID (ex: KPC, HEC)
                     let sp_charge_id = element.sp_charge_id //*충전사업자 충전내역ID (ex: 충전사업자 내부관리ID)
@@ -593,7 +593,7 @@ async function charge_static(data) {
             if(result == 0 || result == 1) {
                 //응답데이터(List)
                 let list = res.body.list //*충전기정보List (ex: )
-                list.forEach(element, index => {
+                list.forEach((element, _) => {
                     let spid = element.spid //*회원사ID (ex: KPC, HEC)
                     let trade_spid = element.trade_spid //*충전거래 사업자ID (ex: KPC, HEC)
                     let platform_spid = element.platform_spid //*로밍플랫폼 연계기관ID (ex: KPC(한전) MEC(환경부))
@@ -717,7 +717,7 @@ async function charge_static_detail(data) {
             if(result == 0 || result == 1) {
                 //응답데이터(List)
                 let list = res.body.list //*충전기정보List (ex: )
-                list.forEach(element, index => {
+                list.forEach((element, _) => {
                     let spid = element.spid //*회원사ID (ex: KPC, HEC)
                     let trade_spid = element.trade_spid //*충전거래 사업자ID (ex: KPC, HEC)
                     let platform_spid = element.platform_spid //*로밍플랫폼 연계기관ID (ex: KPC(한전) MEC(환경부))
@@ -846,7 +846,7 @@ async function charge_static_update(data) {
             if(result == 0 || result == 1) {
                 //응답데이터(List)
                 let list = res.body.list //*충전기정보List (ex: )
-                list.forEach(element, index => {
+                list.forEach((element, _) => {
                     
                     //처리 결과
                     if(result == 1) { //요청처리 일부 정상완료
@@ -961,7 +961,7 @@ async function charge_static_detail_update(data) {
             if(result == 0 || result == 1) {
                 //응답데이터(List)
                 let list = res.body.list //*충전기정보List (ex: )
-                list.forEach(element, index => {
+                list.forEach((element, _) => {
                     
                     //처리 결과
                     if(result == 1) { //요청처리 일부 정상완료

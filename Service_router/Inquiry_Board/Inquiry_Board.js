@@ -38,6 +38,7 @@ router.get("/list", (request, response)=> {
 router.post("/detail", (request, response)=> {
     try {
         let inquiry_id = request.body.inquiry_id
+        
         mysqlConn.connectionService.query("select * from inquiry_board where inquiry_id = ?", inquiry_id , (err, rows)=> {
             if(err) {
                 console.error(err)

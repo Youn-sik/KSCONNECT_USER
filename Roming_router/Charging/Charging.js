@@ -86,7 +86,7 @@ async function cs_info(data) {
             if(result == 0 || result == 1) {
                 //응답데이터(List)
                 let list = res.body.list //*충전기정보List (ex: )
-                list.forEach(element, index => {
+                list.forEach((element, _) => {
                     let spid = element.spid //*회원사ID (ex: KPC, HEC)
                     let csid = element.csid //*로밍플랫폼 충전소ID (ex: KRKPC000000001)
                     let csnm = element.csnm //*충전소명 (ex: 한전본사 남측주차장(공용))
@@ -232,7 +232,7 @@ async function cp_info(data) {
                 if(result == 0 || result == 1) {
                     //응답데이터(List)
                     let list = res.body.list //*충전기정보List (ex: )
-                    list.forEach(element, index => {
+                    list.forEach((element, _) => {
                         let spid = element.spid //*회원사ID (ex: KPC, HEC)
                         let csid = element.csid //*로밍플랫폼 충전소ID (ex: KRKPC000000001)
                         let cpid = element.cpid //*로밍플랫폼 충전기ID (ex: KRKPC000000001)
@@ -378,7 +378,7 @@ async function cp_status(data) {
                 if(result == 0 || result == 1) {
                     //응답데이터(List)
                     let list = res.body.list //*충전기정보List (ex: )
-                    list.forEach(element, index => {
+                    list.forEach((element, _) => {
                         let spid = res.body.spid //*회원사ID (ex: KPC, HEC)
                         let csid = res.body.csid //*로밍플랫폼 충전소ID (ex: KRKPC000000001)
                         let cpid = res.body.cpid //*로밍플랫폼 충전기ID (ex: KRKPC000000001)
@@ -510,7 +510,7 @@ async function cp_idinfo(data) {
             if(result == 0 || result == 1) {
                 //응답데이터(List)
                 let list = res.body.list //*충전기정보List (ex: )
-                list.forEach(element, index => {
+                list.forEach((element, _) => {
                     let spid = element.spid //*회원사ID (ex: KPC, HEC)
                     let csid = element.csid //*로밍플랫폼 충전소ID (ex: KRKPC000000001)
                     let cpid = element.cpid //*로밍플랫폼 충전기ID (ex: KRKPC000000001)
@@ -639,7 +639,7 @@ async function cs_update(data) {
             if(result == 0 || result == 1) {
                 //응답데이터(List)
                 let list = res.body.list //*충전기정보List (ex: )
-                list.forEach(element, index => {
+                list.forEach((element, _) => {
                     let spid = element.spid //*회원사ID (ex: KPC, HEC)
                     let csid = element.csid //*로밍플랫폼 충전소ID (ex: KRKPC000000001)
                     let spcsid = element.spcsid //*충전사업자 충전소ID (ex: 000293
@@ -757,7 +757,7 @@ async function cp_update(data) {
             if(result == 0 || result == 1) {
                 //응답데이터(List)
                 let list = res.body.list //*충전기정보List (ex: )
-                list.forEach(element, index => {
+                list.forEach((element, _) => {
                     let spid = element.spid //*회원사ID (ex: KPC, HEC)
                     let csid = element.csid //*로밍플랫폼 충전소ID (ex: KRKPC000000001)
                     let cpid = element.cpid //*로밍플랫폼 충전기ID (ex: KRKPC000000001)
@@ -877,7 +877,7 @@ async function cp_status_update(data) {
             if(result == 0 || result == 1) {
                 //응답데이터(List)
                 let list = res.body.list //*충전기정보List (ex: )
-                list.forEach(element, index => {
+                list.forEach((element, _) => {
                     
                     //처리 결과
                     if(result == 1) { //요청처리 일부 정상완료
@@ -992,7 +992,7 @@ async function reserv_info(data) {
             if(result == 0 || result == 1) {
                 //응답데이터(List)
                 let list = res.body.list //*충전기정보List (ex: )
-                list.forEach(element, index => {
+                list.forEach((element, _) => {
                     let spid = element.spidv //*회원사ID (ex: KPC, HEC)
                     let csid = element.csid //*로밍플랫폼 충전소ID (ex: KRKPC000000001)
                     let cpid = element.cpid //*로밍플랫폼 충전기ID (ex: KRKPC000000001)
@@ -1120,7 +1120,7 @@ async function reserv_update(data) {
             if(result == 0 || result == 1) {
                 //응답데이터(List)
                 let list = res.body.list //*충전기정보List (ex: )
-                list.forEach(element, index => {
+                list.forEach((element, _) => {
                         let spid = element.spid //회원사ID (ex: KPC, HEC)
                         let csid = element.csid //로밍플랫폼 충전소ID (ex: KRKPC000000001)
                         let cpid = element.cpid //로밍플랫폼 충전기ID (ex: KRKPC000000001)
