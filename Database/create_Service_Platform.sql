@@ -17,6 +17,8 @@ CREATE TABLE `charge_station` (
   `available` varchar(50) NOT NULL,
   `park_fee` int(20) NOT NULL,
   `pay_type` varchar(20) NOT NULL,
+  `lat` varchar(12) NOT NULL,
+  `longi` varchar(12) NOT NULL,
   PRIMARY KEY (`station_id`),
   KEY `company_id_FK` (`company_id`),
   CONSTRAINT `company_id_FK1` FOREIGN KEY (`company_id`) REFERENCES `company` (`company_id`)
@@ -29,6 +31,7 @@ CREATE TABLE `charge_device` (
   `station_id` int(10) NOT NULL,
   `name` varchar(20) NOT NULL,
   `sirial` varchar(50) NOT NULL,
+  `purpose` varchar(20) NOT NULL Check (purpose IN ("public", "apartment", "company")),
   `charge_type` varchar(20) NOT NULL,
   `charge_way` varchar(60) NOT NULL,
   `available` varchar(50) NOT NULL,
