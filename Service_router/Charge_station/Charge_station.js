@@ -76,6 +76,17 @@ router.post("/list", (request, response)=> {
         let status = request.body.status == undefined ? false : request.body.status
         let charge_way = request.body.charge_way == undefined ? false : request.body.charge_way
         let company = request.body.company == undefined ? false : request.body.company
+        let charge_way_arr = []
+
+        if(charge_way.includes("|")) { //여러개 일 때
+            charge_way_arr = charge_way.split("|")
+            if(charge_way_arr.length == 2) charge_way_arr.push(false)
+        } else { //한개일 때
+            charge_way_arr.push(charge_way)
+            charge_way_arr.push(false)
+            charge_way_arr.push(false)
+        }
+        console.log(charge_way_arr)
 
         mysqlConn.connectionService.query("select " +
         // "cd.device_id ,cd.name as cd_name, sirial, charge_type, charge_way, cd.available as cd_available, cd.status as cd_status, cd.last_state as cd_last_state, device_number, purpose, " +
@@ -84,14 +95,14 @@ router.post("/list", (request, response)=> {
         "from charge_device as cd " +
         "inner join charge_station as cs on cs.station_id = cd.station_id " +
         "inner join company as c on cs.company_id = c.company_id " +
-        "where cd.status = ? and cd.charge_way = ? and c.name = ? " +
+        "where cd.status = ? and cd.charge_way in (?, ?, ?) and c.name = ? " +
         "group by cd.station_id"
-        , [status, charge_way, company], (err, rows)=> {
+        , [status, ...charge_way_arr, company], (err, rows)=> { 
             if(err) {
                 console.error(err)
-                response.status(400).send({result: false, errStr: "충전기 목록을 가져오는중 문제가 발생하였습니다.", charge_stations: []})
+                response.status(400).send({result: false, errStr: "충전소 목록을 가져오는중 문제가 발생하였습니다.", charge_stations: []})
             } else {
-                // console.log(rows)
+                console.log(rows)
                 let station_arr = []
                 rows.forEach((element, _) => {
                     let station_info = {
