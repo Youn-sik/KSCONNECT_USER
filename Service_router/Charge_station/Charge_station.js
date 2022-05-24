@@ -8,33 +8,150 @@ moment.tz.setDefault("Asia/Seoul");
 
 router.get("/list", (request, response)=> {
     try {
-        mysqlConn.connectionService.query("select station_id, charge_station.company_id, charge_station.name, status, last_state, " +
-        "address, available, park_fee, company.name as company_name, company_number from charge_station inner join " +
-        "company on charge_station.company_id = company.company_id", (err, rows)=> {
+        let search = request.query.search
+        if(search) {
+            // 검색하여
+            mysqlConn.connectionService.query("select * from charge_station where address like ? or name like ?", ["%"+search+"%", "%"+search+"%"], (err, rows)=> {
+                if(err) {
+                    console.error(err)
+                    response.status(400).send({result: false, errStr: "충전소 정보를 검색하는중 문제가 발생하였습니다.", charge_stations: []})
+                } else {
+                    let charge_station = []
+                    rows.forEach((element, _)=> {
+                        let charge_station_obj = {
+                            station_id: element.station_id,
+                            name: element.name,
+                            status: element.status,
+                            last_state: element.last_state,
+                            address: element.address,
+                            available: element.available,
+                            park_fee: element.park_fee,
+                            company_name: element.company_name,
+                            company_number: element.company_number,
+                            lat: element.lat,
+                            longi: element.longi
+                        }
+                        charge_station.push(charge_station_obj)
+                    });
+                    response.send({result: true, errStr: "", charge_stations: charge_station})
+                }
+            })
+        } else {
+            mysqlConn.connectionService.query("select station_id, charge_station.company_id, charge_station.name, status, last_state, " +
+            "address, available, park_fee, company.name as company_name, company_number, lat, longi from charge_station inner join " +
+            "company on charge_station.company_id = company.company_id", (err, rows)=> {
+                if(err) {
+                    console.error(err)
+                    response.status(400).send({result: false, errStr: "충전소 정보를 가져오는중 문제가 발생하였습니다.", charge_stations: []})
+                } else {
+                    let charge_stations = []
+                    rows.forEach((element, _)=> {
+                        let charge_station_obj = {
+                            station_id: element.station_id,
+                            name: element.name,
+                            status: element.status,
+                            last_state: element.last_state,
+                            address: element.address,
+                            available: element.available,
+                            park_fee: element.park_fee,
+                            company_name: element.company_name,
+                            company_number: element.company_number,
+                            lat: element.lat,
+                            longi: element.longi
+                        }
+                        charge_stations.push(charge_station_obj)
+                    })
+                    response.send({result: true, errStr: "", charge_stations: charge_stations})
+                }
+            })
+        }
+    } catch(err) {
+        console.error(err)
+        response.status(400).send({result: false, errStr:"잘못된 형식 입니다.", charge_stations: []})
+    }
+})
+
+router.post("/list", (request, response)=> {
+    try {
+        let status = request.body.status == undefined ? false : request.body.status
+        let charge_way = request.body.charge_way == undefined ? false : request.body.charge_way
+        let company = request.body.company == undefined ? false : request.body.company
+
+        mysqlConn.connectionService.query("select " +
+        // "cd.device_id ,cd.name as cd_name, sirial, charge_type, charge_way, cd.available as cd_available, cd.status as cd_status, cd.last_state as cd_last_state, device_number, purpose, " +
+        "cs.station_id, cs.name as cs_name, cs.status as cs_status, cs.last_state as cs_last_state, address, cs.available as cs_available, park_fee, pay_type, lat, longi, " +
+        "c.name as c_name, company_number " +
+        "from charge_device as cd " +
+        "inner join charge_station as cs on cs.station_id = cd.station_id " +
+        "inner join company as c on cs.company_id = c.company_id " +
+        "where cd.status = ? and cd.charge_way = ? and c.name = ? " +
+        "group by cd.station_id"
+        , [status, charge_way, company], (err, rows)=> {
             if(err) {
                 console.error(err)
-                response.status(400).send({result: false, errStr: "충전소 정보를 가져오는중 문제가 발생하였습니다.", charge_stations: []})
+                response.status(400).send({result: false, errStr: "충전기 목록을 가져오는중 문제가 발생하였습니다.", charge_stations: []})
             } else {
-                let charge_stations = []
-                rows.forEach((element, _)=> {
-                    let charge_station_obj = {
-                        name: element.name,
-                        status: element.status,
-                        last_state: element.last_state,
-                        address: element.address,
-                        available: element.available,
-                        park_fee: element.park_fee,
-                        company_name: element.company_name,
-                        company_number: element.company_number
+                // console.log(rows)
+                let station_arr = []
+                rows.forEach((element, _) => {
+                    let station_info = {
+                            station_id: element.station_id,
+                            name: element.cs_name,
+                            status: element.cs_status,
+                            last_state: element.cs_last_state,
+                            address: element.address,
+                            available: element.cs_available,
+                            park_fee: element.park_fee,
+                            pay_type: element.pay_type,
+                            lat: element.lat,
+                            longi: element.longi,
+                            company: element.c_name,
+                            company_number: element.company_number,
                     }
-                    charge_stations.push(charge_station_obj)
-                })
-                response.send({result: true, errStr: "", charge_stations: charge_stations})
+                    station_arr.push(station_info)
+                });
+                // console.log(station_arr)
+                response.send({result: true, errStr: "", charge_stations: station_arr})
             }
         })
     } catch(err) {
         console.error(err)
         response.status(400).send({result: false, errStr:"잘못된 형식 입니다.", charge_stations: []})
+    }
+})
+
+router.post("/detail", (request, response)=> {
+    try {
+        let station_id = request.body.station_id
+        mysqlConn.connectionService.query("select * " +
+        "from charge_device "+
+        // "inner join charge_staion on charge_device.station_id = charge_station.station_id " +
+        "where station_id = ?", station_id, (err, rows)=> {
+            if(err) {
+                console.error(err)
+                response.status(400).send({result: false, errStr: "충전기 목록을 가져오는중 문제가 발생하였습니다.", charge_devices: []})
+            } else {
+                let charge_device_arr = []
+                rows.forEach((element, _)=> {
+                    let charge_device_obj = {
+                        name: element.name,
+                        sirial: element.sirial,
+                        charge_type: element.charge_type,
+                        charge_way: element.charge_way,
+                        available: element.available,
+                        status: element.status,
+                        last_state: element.last_state,
+                        device_number: element.device_number,
+                        purpose: element.purpose
+                    }
+                    charge_device_arr.push(charge_device_obj)
+                })
+                response.send({result: true, errStr: "", charge_devices: charge_device_arr})
+            }
+        })
+    } catch(err) {
+        console.error(err)
+        response.send({result: false, errStr: "잘못된 형식 입니다.", charge_devices: []})
     }
 })
 
@@ -47,6 +164,8 @@ router.post("/register", (request, response)=> {
         let available = request.body.available
         let park_fee = request.body.park_fee
         let pay_type = request.body.pay_type
+        let lat = request.body.lat
+        let longi = request.body.longi
 
         const charge_station_obj = {
             company_id: company_id,
@@ -55,7 +174,9 @@ router.post("/register", (request, response)=> {
             address: address,
             available: available,
             park_fee: park_fee,
-            pay_type: pay_type
+            pay_type: pay_type,
+            lat: lat,
+            longi: longi
         }
 
         mysqlConn.connectionService.query("insert into charge_station set ?", charge_station_obj, (err, rows)=> {

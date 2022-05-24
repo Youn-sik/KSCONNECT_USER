@@ -12,14 +12,14 @@ router.post("/login", (request, response)=> {
         mysqlConn.connectionService.query("select * from user where id = ?", id, (err, rows)=> {
             if(err) {
                 console.error(err)
-                response.status(400).send({result: false, errStr: "로그인 중 데이터베이스 에러가 발생하였습니다."})
+                response.status(400).send({result: false, errStr: "로그인 중 데이터베이스 에러가 발생하였습니다.", user_info: {}, token: ""})
             } else {
                 if(password === rows[0].password) {
                     const uid = rows[0].uid
                     const token = jwt.sign({
                         uid
                     }, "cho", {
-                        expiresIn: "1h"
+                        expiresIn: "12h"
                     })
                     const user_info = {
                         id: rows[0].id,
@@ -158,6 +158,35 @@ router.put("/edit", (request, response)=> {
     } catch(err) {
         console.error(err)
         response.status(400).send({result: false, errStr:"잘못된 형식 입니다."})
+    }
+})
+
+router.get("/info", (request, response)=> {
+    try {
+        mysqlConn.connectionService.query("select * from user where uid = ?", request.decoded.uid, (err, rows)=> {
+            if(err) {
+                console.error(err)
+                response.status(400).send({result: false, errStr: "회원 정보를 가져오는중 문제가 발생하였습니다.", user_info: {}})
+            } else {
+                const user_info = {
+                    id: rows[0].id,
+                    name: rows[0].name,
+                    email: rows[0].email,
+                    mobile: rows[0].mobile,
+                    address: rows[0].address,
+                    car_model: rows[0].car_model,
+                    car_number: rows[0].car_number,
+                    payment_card_company: rows[0].payment_card_company,
+                    payment_card_number: rows[0].payment_card_number,
+                    membership_card_number: rows[0].membership_card_number,
+                    point: rows[0].point,
+                }
+                response.send({result: true, errStr: "", user_info: user_info})
+            }
+        })
+    } catch(err) {
+        console.error(err)
+        response.send({result: false, errStr: "잘못된 형식 입니다."})
     }
 })
 
