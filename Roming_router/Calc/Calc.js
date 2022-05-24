@@ -17,41 +17,41 @@ const basic_req_data = {
     "spkey": spkey
 }
 
-const calc_info_job = schedule.scheduleJob('0 */1 * * * *', async ()=> {
-// const calc_info_job = schedule.scheduleJob('0 0 0 */1 * *', async ()=> {
-    let result = await calc_info(basic_req_data)
-    console.log(result)
-})
+// const calc_info_job = schedule.scheduleJob('0 */1 * * * *', async ()=> {
+// // const calc_info_job = schedule.scheduleJob('0 0 0 */1 * *', async ()=> {
+//     let result = await calc_info(basic_req_data)
+//     console.log(result)
+// })
 
-const calc_update_job = schedule.scheduleJob('0 */1 * * * *', async ()=> {
-// const calc_update_job = schedule.scheduleJob('0 0 0 */1 * *', async ()=> {
-    let result = await calc_update(basic_req_data)
-    console.log(result)
-})
+// const calc_update_job = schedule.scheduleJob('0 */1 * * * *', async ()=> {
+// // const calc_update_job = schedule.scheduleJob('0 0 0 */1 * *', async ()=> {
+//     let result = await calc_update(basic_req_data)
+//     console.log(result)
+// })
 
-const calc_req_info_job = schedule.scheduleJob('0 */1 * * * *', async ()=> {
-// const calc_req_info_job = schedule.scheduleJob('0 0 0 0 */1 *', async ()=> {
-    let result = await calc_req_info(basic_req_data)
-    console.log(result)
-})
+// const calc_req_info_job = schedule.scheduleJob('0 */1 * * * *', async ()=> {
+// // const calc_req_info_job = schedule.scheduleJob('0 0 0 0 */1 *', async ()=> {
+//     let result = await calc_req_info(basic_req_data)
+//     console.log(result)
+// })
 
-const calc_req_update_job = schedule.scheduleJob('0 */1 * * * *', async ()=> {
-// const calc_req_update_job = schedule.scheduleJob('0 0 0 0 */1 *', async ()=> {
-    let result = await calc_req_update(basic_req_data)
-    console.log(result)
-})
+// const calc_req_update_job = schedule.scheduleJob('0 */1 * * * *', async ()=> {
+// // const calc_req_update_job = schedule.scheduleJob('0 0 0 0 */1 *', async ()=> {
+//     let result = await calc_req_update(basic_req_data)
+//     console.log(result)
+// })
 
-const calc_pay_info_job = schedule.scheduleJob('0 */1 * * * *', async ()=> {
-// const calc_pay_info_job = schedule.scheduleJob('0 0 0 0 */1 *', async ()=> {
-    let result = await calc_pay_info(basic_req_data)
-    console.log(result)
-})
+// const calc_pay_info_job = schedule.scheduleJob('0 */1 * * * *', async ()=> {
+// // const calc_pay_info_job = schedule.scheduleJob('0 0 0 0 */1 *', async ()=> {
+//     let result = await calc_pay_info(basic_req_data)
+//     console.log(result)
+// })
 
-const calc_pay_update_job = schedule.scheduleJob('0 */1 * * * *', async ()=> {
-// const calc_pay_update_job = schedule.scheduleJob('0 0 0 0 */1 *', async ()=> {
-    let result = await calc_pay_update(basic_req_data)
-    console.log(result)
-})
+// const calc_pay_update_job = schedule.scheduleJob('0 */1 * * * *', async ()=> {
+// // const calc_pay_update_job = schedule.scheduleJob('0 0 0 0 */1 *', async ()=> {
+//     let result = await calc_pay_update(basic_req_data)
+//     console.log(result)
+// })
 
 
 // 1. 로밍 정산대상 조회

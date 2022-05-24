@@ -21,47 +21,47 @@ const basic_req_data = {
     "spkey": spkey
 }
 
-const cs_info_job = schedule.scheduleJob('0 */1 * * * *', async ()=> {
-// const cs_info_job = schedule.scheduleJob('0 0 0 */1 * *', ()=> {
-    let result = await cs_info(basic_req_data)
-    console.log(result)
+// const cs_info_job = schedule.scheduleJob('0 */1 * * * *', async ()=> {
+// // const cs_info_job = schedule.scheduleJob('0 0 0 */1 * *', ()=> {
+//     let result = await cs_info(basic_req_data)
+//     console.log(result)
 
-    // let testObj = {
-    //     name: "쿨사인",
-    //     company_number: "02-8055-8055",
-    // }
-    // mysqlConn.connectionService.query("INSERT INTO company SET ?", testObj, async (err, rows) {
-    //     if(err) console.error(err)
-    //     console.log(rows)
-    // });
+//     // let testObj = {
+//     //     name: "쿨사인",
+//     //     company_number: "02-8055-8055",
+//     // }
+//     // mysqlConn.connectionService.query("INSERT INTO company SET ?", testObj, async (err, rows) {
+//     //     if(err) console.error(err)
+//     //     console.log(rows)
+//     // });
 
-    // let testObj = {
-    //     company_id: 1,
-    //     name: "제 1주차장 현관 앞 충전소",
-    //     status: "Y",
-    //     last_state: moment().format('YYYY-MM-DD HH:mm:ss'),
-    //     address: "서울특별시 구로구 디지털로27바길 27",
-    //     available: "24시간",
-    //     park_fee: "500",
-    //     contect_number: "02-8055-8055",
-    //     pay_type: "신용카드"
-    // }
-    // mysqlConn.connectionService.query("INSERT INTO charge_station SET ?", testObj, async (err, rows) {
-    //     if(err) console.error(err)
-    //     console.log(rows)
-    // });
-})
+//     // let testObj = {
+//     //     company_id: 1,
+//     //     name: "제 1주차장 현관 앞 충전소",
+//     //     status: "Y",
+//     //     last_state: moment().format('YYYY-MM-DD HH:mm:ss'),
+//     //     address: "서울특별시 구로구 디지털로27바길 27",
+//     //     available: "24시간",
+//     //     park_fee: "500",
+//     //     contect_number: "02-8055-8055",
+//     //     pay_type: "신용카드"
+//     // }
+//     // mysqlConn.connectionService.query("INSERT INTO charge_station SET ?", testObj, async (err, rows) {
+//     //     if(err) console.error(err)
+//     //     console.log(rows)
+//     // });
+// })
 
-const cp_info_job = schedule.scheduleJob('0 */1 * * * *', async ()=> {
-// const cp_info_job = schedule.scheduleJob('0 0 0 */1 * *', ()=> {
-    let result = await cp_info(basic_req_data)
-    console.log(result)
-})
+// const cp_info_job = schedule.scheduleJob('0 */1 * * * *', async ()=> {
+// // const cp_info_job = schedule.scheduleJob('0 0 0 */1 * *', ()=> {
+//     let result = await cp_info(basic_req_data)
+//     console.log(result)
+// })
 
-const cp_status_job = schedule.scheduleJob('0 */1 * * * *', async ()=> {
-    let result = await cp_status(basic_req_data)
-    console.log(result)
-})
+// const cp_status_job = schedule.scheduleJob('0 */1 * * * *', async ()=> {
+//     let result = await cp_status(basic_req_data)
+//     console.log(result)
+// })
 
 
 // 1. 충전소 정보 조회

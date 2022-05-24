@@ -17,17 +17,17 @@ const basic_req_data = {
     "spkey": spkey
 }
 
-const uid_info_job = schedule.scheduleJob('0 */1 * * * *', async ()=> {
-// const uid_info_job = schedule.scheduleJob('0 0 0 */1 * *', async ()=> {
-    let result = await uid_info(basic_req_data)
-    console.log(result)
-})
+// const uid_info_job = schedule.scheduleJob('0 */1 * * * *', async ()=> {
+// // const uid_info_job = schedule.scheduleJob('0 0 0 */1 * *', async ()=> {
+//     let result = await uid_info(basic_req_data)
+//     console.log(result)
+// })
 
-const auth_info_job = schedule.scheduleJob('0 */1 * * * *', async ()=> {
-// const auth_info_job = schedule.scheduleJob('0 0 0 */1 * *', async ()=> {
-    let result = await auth_info(basic_req_data)
-    console.log(result)
-})
+// const auth_info_job = schedule.scheduleJob('0 */1 * * * *', async ()=> {
+// // const auth_info_job = schedule.scheduleJob('0 0 0 */1 * *', async ()=> {
+//     let result = await auth_info(basic_req_data)
+//     console.log(result)
+// })
 
 
 // 1. 회원정보 조회

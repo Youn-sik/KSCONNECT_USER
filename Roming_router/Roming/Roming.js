@@ -17,29 +17,29 @@ const basic_req_data = {
     "spkey": spkey
 }
 
-const charge_static_job = schedule.scheduleJob('0 */1 * * * *', async ()=> {
-// const charge_static_job = schedule.scheduleJob('0 0 0 */1 * *', async ()=> {
-    let result = await charge_static(basic_req_data)
-    console.log(result)
-})
+// const charge_static_job = schedule.scheduleJob('0 */1 * * * *', async ()=> {
+// // const charge_static_job = schedule.scheduleJob('0 0 0 */1 * *', async ()=> {
+//     let result = await charge_static(basic_req_data)
+//     console.log(result)
+// })
 
-const charge_static_detail_job = schedule.scheduleJob('0 */1 * * * *', async ()=> {
-// const charge_static_detail_job = schedule.scheduleJob('0 0 0 */1 * *', async ()=> {
-    let result = await charge_static_detail(basic_req_data)
-    console.log(result)
-})
+// const charge_static_detail_job = schedule.scheduleJob('0 */1 * * * *', async ()=> {
+// // const charge_static_detail_job = schedule.scheduleJob('0 0 0 */1 * *', async ()=> {
+//     let result = await charge_static_detail(basic_req_data)
+//     console.log(result)
+// })
 
-const charge_static_update_job = schedule.scheduleJob('0 */1 * * * *', async ()=> {
-// const charge_static_update_job = schedule.scheduleJob('0 0 0 */1 * *', async ()=> {
-    let result = await charge_static_update(basic_req_data)
-    console.log(result)
-})
+// const charge_static_update_job = schedule.scheduleJob('0 */1 * * * *', async ()=> {
+// // const charge_static_update_job = schedule.scheduleJob('0 0 0 */1 * *', async ()=> {
+//     let result = await charge_static_update(basic_req_data)
+//     console.log(result)
+// })
 
-const charge_static_detail_update_job = schedule.scheduleJob('0 */1 * * * *', async ()=> {
-// const charge_static_detail_update_job = schedule.scheduleJob('0 0 0 */1 * *', async ()=> {
-    let result = await charge_static_detail_update(basic_req_data)
-    console.log(result)
-})
+// const charge_static_detail_update_job = schedule.scheduleJob('0 */1 * * * *', async ()=> {
+// // const charge_static_detail_update_job = schedule.scheduleJob('0 0 0 */1 * *', async ()=> {
+//     let result = await charge_static_detail_update(basic_req_data)
+//     console.log(result)
+// })
 
 
 // 1. 로밍 충전내역 조회
