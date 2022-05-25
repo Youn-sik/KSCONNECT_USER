@@ -498,6 +498,7 @@ CREATE TABLE `user` (
   `payment_card_number` varchar(50) DEFAULT NULL,
   `membership_card_number` varchar(50) DEFAULT NULL,
   `point` int(255) NOT NULL DEFAULT 0,
+  `rfid` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`uid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;

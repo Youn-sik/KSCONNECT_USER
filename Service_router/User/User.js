@@ -33,6 +33,7 @@ router.post("/login", (request, response)=> {
                         payment_card_number: rows[0].payment_card_number,
                         membership_card_number: rows[0].membership_card_number,
                         point: rows[0].point,
+                        rfid: rows[0].rfid
                     }
                     response.send({result: true, errStr: "", user_info: user_info, token: token})
                 } else {
