@@ -10,5 +10,11 @@
     "mysql_password": "master",
     "Service_Platform": "Service_Platform",
     "Roming_Platform": "Roming_Platform",
-    "Service_Session": "Service_Session"
+    "Service_Session": "Service_Session",
+    "mqtt_host": "127.0.0.1",
+    "mqtt_port": "1883",
+    "mqtt_user": "kool",
+    "mqtt_password": "master",
+    "nats_host": "localhost",
+    "nats_port": "4333"
 }

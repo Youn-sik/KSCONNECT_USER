@@ -78,15 +78,24 @@ router.post("/list", (request, response)=> {
         let company = request.body.company == undefined ? false : request.body.company
         let charge_way_arr = []
 
-        if(charge_way.includes("|")) { //여러개 일 때
-            charge_way_arr = charge_way.split("|")
-            if(charge_way_arr.length == 2) charge_way_arr.push(false)
-        } else { //한개일 때
-            charge_way_arr.push(charge_way)
+        if(charge_way != false) {
+            if(charge_way.includes("|")) { //여러개 일 때
+                charge_way_arr = charge_way.split("|")
+
+                if(charge_way_arr.length == 2) {//두개일 때
+                    charge_way_arr.push(true)
+                }
+            } else { //한개일 때
+                charge_way_arr.push(charge_way)
+                charge_way_arr.push(true)
+                charge_way_arr.push(true)
+            }
+        } else { //0개일 때
+            charge_way_arr.push(false)
             charge_way_arr.push(false)
             charge_way_arr.push(false)
         }
-        console.log(charge_way_arr)
+        // console.log(charge_way_arr)
 
         mysqlConn.connectionService.query("select " +
         // "cd.device_id ,cd.name as cd_name, sirial, charge_type, charge_way, cd.available as cd_available, cd.status as cd_status, cd.last_state as cd_last_state, device_number, purpose, " +
