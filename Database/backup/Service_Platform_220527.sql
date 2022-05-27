@@ -27,7 +27,7 @@ CREATE TABLE `FAQ_board` (
   `title` varchar(50) NOT NULL,
   `context` varchar(255) NOT NULL,
   PRIMARY KEY (`FAQ_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -36,6 +36,7 @@ CREATE TABLE `FAQ_board` (
 
 LOCK TABLES `FAQ_board` WRITE;
 /*!40000 ALTER TABLE `FAQ_board` DISABLE KEYS */;
+INSERT INTO `FAQ_board` VALUES (1,'FAQ 사항 테스트 입니다.','FAQ 사항 테스트 내용 데이터 입니다.'),(2,'FAQ 사항 테스트 입니다111.','FAQ 사항 테스트 내용 데이터 입니다.');
 /*!40000 ALTER TABLE `FAQ_board` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -54,13 +55,15 @@ CREATE TABLE `charge_device` (
   `charge_type` varchar(20) NOT NULL,
   `charge_way` varchar(60) NOT NULL,
   `available` varchar(50) NOT NULL,
-  `status` varchar(20) NOT NULL Check (status IN ('Y','N','F','I')),
+  `status` varchar(20) NOT NULL CHECK (`status` in ('Y','N','F','I')),
   `last_state` datetime DEFAULT NULL,
   `device_number` int(20) NOT NULL,
   PRIMARY KEY (`device_id`),
   KEY `station_id_FK` (`station_id`),
-  CONSTRAINT `station_id_FK1` FOREIGN KEY (`station_id`) REFERENCES `charge_station` (`station_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+  CONSTRAINT `station_id_FK1` FOREIGN KEY (`station_id`) REFERENCES `charge_station` (`station_id`),
+  CONSTRAINT `CONSTRAINT_1` CHECK (`status` in ('Y','N','F','I')),
+  CONSTRAINT `CONSTRAINT_2` CHECK (`status` in ('Y','N','F','I'))
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -69,6 +72,7 @@ CREATE TABLE `charge_device` (
 
 LOCK TABLES `charge_device` WRITE;
 /*!40000 ALTER TABLE `charge_device` DISABLE KEYS */;
+INSERT INTO `charge_device` VALUES (1,1,'현관 충전기 01번','KSF12345','완속','AC 완속','24시간','Y',NULL,1),(2,2,'현관 충전기 01번','KSC23456','완속','AC 완속','08:00~20:00','Y',NULL,1),(3,2,'현관 충전기 02번','KSC34567','완속','AC 완속','08:00~20:00','N',NULL,2),(4,1,'현관 충전기 02번','KSC45678','완속','AC 완속','24시간','F',NULL,2),(5,1,'주차장 충전기 01번','KSC56789','완속','AC 완속','24시간','N',NULL,1),(6,2,'주차장 충전기 01번','KSC7890','완속','AC 완속','08:00~20:00','Y',NULL,3),(7,3,'주차장 충전기 01번','KSS1234','완속','AC 완속','08:00~20:00','Y',NULL,1),(8,3,'주차장 충전기 02번','KSS1233','급속','DC 콤보','08:00~20:00','Y',NULL,2),(9,4,'주차장 충전기 01번','KSS1244','완속','AC 완속','08:00~20:00','I',NULL,1),(10,4,'주차장 충전기 02번','KSS1452','급속','DC 콤보','08:00~20:00','N',NULL,2),(11,5,'현관 충전기 01번','KSA1234','급속','DC 콤보','08:00~20:00','N',NULL,1),(12,5,'현관 충전기 02번','KSA2345','급속','DC 콤보','08:00~20:00','N',NULL,2),(13,6,'현관 충전기 01번','KSE1234','완속','AC 완속','08:00~20:00','F',NULL,1),(14,6,'현관 충전기 02번','KSE2345','완속','AC 완속','08:00~20:00','N',NULL,2);
 /*!40000 ALTER TABLE `charge_device` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -81,13 +85,17 @@ DROP TABLE IF EXISTS `charge_price`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `charge_price` (
   `charge_price_id` int(10) NOT NULL AUTO_INCREMENT,
-  `public` varchar(20) NOT NULL Check (public IN ('Y', 'N')),
-  `season` varchar(20) NOT NULL Check (season IN ('S', 'W', 'E', 'Z')),
-  `power` varchar(20) NOT NULL Check (power IN ('S', 'M', 'L', 'Z')),
-  `kw100` varchar(20) NOT NULL Check (kw100 IN ('Y', 'N', 'Z')),
-  `price` float(20) NOT NULL DEFAULT 0,
-  PRIMARY KEY (`charge_price_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+  `public` varchar(20) NOT NULL,
+  `season` varchar(20) NOT NULL,
+  `power` varchar(20) NOT NULL,
+  `kw100` varchar(20) NOT NULL,
+  `price` float NOT NULL DEFAULT 0,
+  PRIMARY KEY (`charge_price_id`),
+  CONSTRAINT `CONSTRAINT_1` CHECK (`public` in ('Y','N')),
+  CONSTRAINT `CONSTRAINT_2` CHECK (`season` in ('S','W','E','Z')),
+  CONSTRAINT `CONSTRAINT_3` CHECK (`power` in ('S','M','L','Z')),
+  CONSTRAINT `CONSTRAINT_4` CHECK (`kw100` in ('Y','N','Z'))
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -96,6 +104,7 @@ CREATE TABLE `charge_price` (
 
 LOCK TABLES `charge_price` WRITE;
 /*!40000 ALTER TABLE `charge_price` DISABLE KEYS */;
+INSERT INTO `charge_price` VALUES (1,'Y','Z','Z','N',292.9),(2,'Y','Z','Z','Y',309.1),(3,'N','S','S','Z',204.6),(4,'N','S','M','Z',257),(5,'N','S','L','N',266.3),(6,'N','S','L','Y',281),(7,'N','E','S','Z',187.1),(8,'N','E','M','Z',196.6),(9,'N','E','L','N',200.6),(10,'N','E','L','Y',200.6),(11,'N','W','S','Z',218.5),(12,'N','W','M','Z',240.9),(13,'N','W','L','N',266.3),(14,'N','W','L','Y',281);
 /*!40000 ALTER TABLE `charge_price` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -112,13 +121,13 @@ CREATE TABLE `charge_record` (
   `station_id` int(10) NOT NULL,
   `device_id` int(10) NOT NULL,
   `emaid` varchar(20) NOT NULL,
-  `status` varchar(20) NOT NULL Check (status IN ('Y', 'N')),
+  `status` varchar(20) NOT NULL,
   `car_model` varchar(80) NOT NULL,
   `car_number` varchar(50) NOT NULL,
   `pay_card_company` varchar(50) NOT NULL,
   `pay_card_number` varchar(50) NOT NULL,
   `pay_method` varchar(50) NOT NULL,
-  `pay_status` varchar(50) NOT NULL Check (pay_status IN ('Y', 'N')),
+  `pay_status` varchar(50) NOT NULL,
   `charge_st_date` datetime NOT NULL,
   `charge_end_date` datetime NOT NULL,
   `charge_kwh` varchar(20) NOT NULL,
@@ -140,8 +149,10 @@ CREATE TABLE `charge_record` (
   KEY `device_id_FK` (`device_id`),
   CONSTRAINT `device_id_FK1` FOREIGN KEY (`device_id`) REFERENCES `charge_device` (`device_id`),
   CONSTRAINT `station_id_FK2` FOREIGN KEY (`station_id`) REFERENCES `charge_station` (`station_id`),
-  CONSTRAINT `uid_FK3` FOREIGN KEY (`uid`) REFERENCES `user` (`uid`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+  CONSTRAINT `uid_FK3` FOREIGN KEY (`uid`) REFERENCES `user` (`uid`),
+  CONSTRAINT `CONSTRAINT_1` CHECK (`status` in ('Y','N')),
+  CONSTRAINT `CONSTRAINT_2` CHECK (`pay_status` in ('Y','N'))
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -150,6 +161,7 @@ CREATE TABLE `charge_record` (
 
 LOCK TABLES `charge_record` WRITE;
 /*!40000 ALTER TABLE `charge_record` DISABLE KEYS */;
+INSERT INTO `charge_record` VALUES (1,1,1,1,'차량회원번호','N','현대 아이오닉5','00바 0000','기업은행','0000000000000000','신용카드','Y','2022-04-22 14:00:00','2022-04-22 15:00:00','70','70','0','0','20496','20496','0','0','292.8','292.5','292.2','급속','DC 콤보'),(2,1,1,4,'차량회원번호','N','현대 아이오닉5','00바 0000','기업은행','0000000000000000','신용카드','Y','2022-05-08 20:00:00','2022-05-08 21:00:00','50','50','0','0','19829','19829','0','0','292.8','292.5','292.2','완속','AC 완속'),(3,1,2,2,'차량회원번호','N','현대 아이오닉5','00바 0000','기업은행','0000000000000000','신용카드','Y','2022-05-10 09:00:00','2022-05-10 10:00:00','90','90','0','0','23123','23123','0','0','292.8','292.5','292.2','완속','AC 완속'),(4,1,2,3,'차량회원번호','N','현대 아이오닉5','00바 0000','기업은행','0000000000000000','신용카드','Y','2022-05-13 12:00:00','2022-05-13 14:00:00','70','70','0','0','20496','20496','0','0','292.8','292.5','292.2','완속','AC 완속'),(5,1,2,6,'차량회원번호','N','현대 아이오닉5','00바 0000','기업은행','0000000000000000','신용카드','N','2022-05-15 15:00:00','2022-05-15 16:00:00','90','90','0','0','23123','23123','0','0','292.8','292.5','292.2','급속','DC 콤보'),(6,10,1,1,'차량회원번호','N','현대 아이오닉5','11바 1111','하나은행','0000000000000000','신용카드','Y','2022-04-22 14:00:00','2022-04-22 15:00:00','70','70','0','0','20496','20496','0','0','292.8','292.5','292.2','급속','DC 콤보'),(7,10,1,4,'차량회원번호','N','현대 아이오닉5','11바 1111','하나은행','0000000000000000','신용카드','Y','2022-05-08 20:00:00','2022-05-08 21:00:00','50','50','0','0','19829','19829','0','0','292.8','292.5','292.2','완속','AC 완속'),(8,10,2,2,'차량회원번호','N','현대 아이오닉5','11바 1111','하나은행','0000000000000000','신용카드','Y','2022-05-10 09:00:00','2022-05-10 10:00:00','90','90','0','0','23123','23123','0','0','292.8','292.5','292.2','완속','AC 완속'),(9,10,2,3,'차량회원번호','N','현대 아이오닉5','11바 1111','하나은행','0000000000000000','신용카드','Y','2022-05-13 12:00:00','2022-05-13 14:00:00','70','70','0','0','20496','20496','0','0','292.8','292.5','292.2','완속','AC 완속'),(10,10,2,6,'차량회원번호','N','현대 아이오닉5','11바 1111','하나은행','0000000000000000','신용카드','N','2022-05-15 15:00:00','2022-05-15 16:00:00','90','90','0','0','23123','23123','0','0','292.8','292.5','292.2','급속','DC 콤보');
 /*!40000 ALTER TABLE `charge_record` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -164,7 +176,7 @@ CREATE TABLE `charge_station` (
   `station_id` int(10) NOT NULL AUTO_INCREMENT,
   `company_id` int(10) NOT NULL,
   `name` varchar(20) NOT NULL,
-  `status` varchar(20) NOT NULL Check (status IN ('Y','N','F','I')),
+  `status` varchar(20) NOT NULL CHECK (`status` in ('Y','N','F','I')),
   `last_state` datetime DEFAULT NULL,
   `address` varchar(255) NOT NULL,
   `available` varchar(50) NOT NULL,
@@ -172,11 +184,12 @@ CREATE TABLE `charge_station` (
   `pay_type` varchar(20) NOT NULL,
   `lat` varchar(12) NOT NULL,
   `longi` varchar(12) NOT NULL,
-  `purpose` varchar(20) NOT NULL Check (purpose IN ("public", "apartment", "company")),
+  `purpose` varchar(20) NOT NULL,
   PRIMARY KEY (`station_id`),
   KEY `company_id_FK` (`company_id`),
-  CONSTRAINT `company_id_FK1` FOREIGN KEY (`company_id`) REFERENCES `company` (`company_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+  CONSTRAINT `company_id_FK1` FOREIGN KEY (`company_id`) REFERENCES `company` (`company_id`),
+  CONSTRAINT `CONSTRAINT_1` CHECK (`status` in ('Y','N','F','I'))
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -185,6 +198,7 @@ CREATE TABLE `charge_station` (
 
 LOCK TABLES `charge_station` WRITE;
 /*!40000 ALTER TABLE `charge_station` DISABLE KEYS */;
+INSERT INTO `charge_station` VALUES (1,1,'쿨사인 제 1주차장 현관 앞 충전소','Y','2022-04-22 14:41:00','서울특별시 구로구 디지털로27바길 27','24시간',500,'신용카드','37.484528','126.892417','company'),(2,1,'쿨사인 제 2주차장 현관 앞 충전소','Y',NULL,'서울특별시 구로구 디지털로27바길 27','08:00~20:00',300,'신용카드','37.484720','126.892600','company'),(3,2,'조가네 지하 1층 주차장','Y',NULL,'경기도 성남시 중원구 제일로35번길 8','08:00~20:00',1000,'신용카드','37.430466','127.135928','public'),(4,2,'조가네 지하 2층 주차장','I',NULL,'경기도 성남시 중원구 제일로35번길 8','08:00~20:00',1000,'신용카드','37.430560','127.135087','public'),(5,1,'구로남초등학교','N',NULL,'서울특별시 구로구 디지털로27길 76 구로남초등학교','08:00~20:00',500,'신용카드','37.485138','126.890649','public'),(6,1,'국민은행 현관 앞 충전소','F',NULL,'서울특별시 구로구 디지털로 273','08:00~20:00',1000,'신용카드','37.483852','126.893970','company');
 /*!40000 ALTER TABLE `charge_station` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -200,7 +214,7 @@ CREATE TABLE `company` (
   `name` varchar(50) NOT NULL,
   `company_number` varchar(20) NOT NULL,
   PRIMARY KEY (`company_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -209,6 +223,7 @@ CREATE TABLE `company` (
 
 LOCK TABLES `company` WRITE;
 /*!40000 ALTER TABLE `company` DISABLE KEYS */;
+INSERT INTO `company` VALUES (1,'쿨사인','02-8055-8055'),(2,'조가','02-822-8454');
 /*!40000 ALTER TABLE `company` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -279,15 +294,17 @@ DROP TABLE IF EXISTS `inquiry_board`;
 CREATE TABLE `inquiry_board` (
   `inquiry_id` int(10) NOT NULL AUTO_INCREMENT,
   `uid` int(10) NOT NULL,
-  `type` varchar(50) NOT NULL Check (type IN ("normal", "charge", "user", "card", "discharge", "etc")),
+  `type` varchar(50) NOT NULL,
   `title` varchar(50) NOT NULL,
   `context` varchar(255) NOT NULL,
   `date` datetime NOT NULL,
-  `status` varchar(20) NOT NULL DEFAULT 'N' Check (status IN ('Y', 'N')),
+  `status` varchar(20) NOT NULL DEFAULT 'N',
   PRIMARY KEY (`inquiry_id`),
   KEY `uid_FK` (`uid`),
-  CONSTRAINT `uid_FK4` FOREIGN KEY (`uid`) REFERENCES `user` (`uid`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+  CONSTRAINT `uid_FK4` FOREIGN KEY (`uid`) REFERENCES `user` (`uid`),
+  CONSTRAINT `CONSTRAINT_1` CHECK (`status` in ('Y','N')),
+  CONSTRAINT `CONSTRAINT_2` CHECK (`type` in ('normal','charge','user','card','discharge','etc'))
+) ENGINE=InnoDB AUTO_INCREMENT=24 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -296,6 +313,7 @@ CREATE TABLE `inquiry_board` (
 
 LOCK TABLES `inquiry_board` WRITE;
 /*!40000 ALTER TABLE `inquiry_board` DISABLE KEYS */;
+INSERT INTO `inquiry_board` VALUES (1,1,'etc','1대1 문의사항 제목','1대1 문의사항 본문','2022-05-09 10:49:18','N'),(3,1,'etc','1대1 문의사항 제목','1대1 문의사항 본문','2022-05-09 10:49:35','N'),(5,3,'etc','1대1 문의사항 제목','1대1 문의사항 본문','2022-05-09 10:50:10','N'),(6,3,'etc','1대1 문의사항 제목','1대1 문의사항 본문','2022-05-09 10:50:10','N'),(7,3,'etc','1대1 문의사항 제목','1대1 문의사항 본문','2022-05-09 10:50:11','N'),(8,9,'normal','일반 문의 제목1','일반 문의 본문1','2022-05-10 17:47:28','N'),(9,9,'charge','충전 문의 제목1','충전 문의 본문1','2022-05-10 17:47:52','N'),(10,9,'card','카드 문의 제목1','카드 문의 본문1','2022-05-10 17:48:12','N'),(11,9,'etc','기타 문의 제목1','기타 문의 본문1','2022-05-10 17:48:26','N'),(14,11,'normal','1대1 문의사항 제목','1대1 문의사항 본문','2022-05-16 10:54:59','N'),(15,11,'card','dddd','dddd','2022-05-16 11:27:34','N'),(18,9,'charge','test 제목','test 내용','2022-05-23 14:30:57','N'),(19,9,'user','hello','내용내용','2022-05-23 16:05:49','N');
 /*!40000 ALTER TABLE `inquiry_board` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -312,7 +330,7 @@ CREATE TABLE `notice_board` (
   `context` varchar(255) NOT NULL,
   `date` datetime NOT NULL,
   PRIMARY KEY (`notice_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -321,6 +339,7 @@ CREATE TABLE `notice_board` (
 
 LOCK TABLES `notice_board` WRITE;
 /*!40000 ALTER TABLE `notice_board` DISABLE KEYS */;
+INSERT INTO `notice_board` VALUES (1,'공지사항 테스트','이 내용은 공지사항 기능 테스트를 위한 글 입니다.','2022-05-02 16:41:01');
 /*!40000 ALTER TABLE `notice_board` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -334,15 +353,16 @@ DROP TABLE IF EXISTS `point_record`;
 CREATE TABLE `point_record` (
   `ponint_record_id` int(10) NOT NULL AUTO_INCREMENT,
   `uid` int(10) NOT NULL,
-  `status` varchar(20) NOT NULL Check (status IN ('P', 'M')),
+  `status` varchar(20) NOT NULL,
   `current_point` int(20) NOT NULL,
   `calculate_point` int(20) NOT NULL,
   `remain_point` int(20) NOT NULL,
   `date` datetime NOT NULL,
   PRIMARY KEY (`ponint_record_id`),
   KEY `uid_FK` (`uid`),
-  CONSTRAINT `uid_FK1` FOREIGN KEY (`uid`) REFERENCES `user` (`uid`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+  CONSTRAINT `uid_FK1` FOREIGN KEY (`uid`) REFERENCES `user` (`uid`),
+  CONSTRAINT `CONSTRAINT_1` CHECK (`status` in ('P','M'))
+) ENGINE=InnoDB AUTO_INCREMENT=27 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -351,6 +371,7 @@ CREATE TABLE `point_record` (
 
 LOCK TABLES `point_record` WRITE;
 /*!40000 ALTER TABLE `point_record` DISABLE KEYS */;
+INSERT INTO `point_record` VALUES (14,1,'P',0,30000,30000,'2022-04-28 10:17:18'),(15,1,'P',30000,210000,240000,'2022-04-28 10:17:38'),(16,2,'P',0,100000,100000,'2022-04-28 10:18:00'),(17,1,'P',240000,100000,340000,'2022-05-10 17:42:25'),(18,11,'P',0,300000,300000,'2022-05-13 16:12:10'),(19,11,'P',300000,140000,440000,'2022-05-13 16:46:21'),(20,11,'P',440000,70000,510000,'2022-05-13 16:47:15'),(21,11,'P',510000,50000,560000,'2022-05-13 16:48:59'),(22,11,'P',560000,70000,630000,'2022-05-13 16:49:19'),(23,11,'P',630000,50000,680000,'2022-05-13 16:49:50'),(24,11,'P',680000,50000,730000,'2022-05-13 16:50:15'),(25,11,'P',730000,30000,760000,'2022-05-13 16:52:18'),(26,10,'P',0,500000,500000,'2022-05-24 11:46:09');
 /*!40000 ALTER TABLE `point_record` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -367,7 +388,7 @@ CREATE TABLE `product` (
   `context` varchar(255) NOT NULL,
   `price` int(20) NOT NULL,
   PRIMARY KEY (`product_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -376,6 +397,7 @@ CREATE TABLE `product` (
 
 LOCK TABLES `product` WRITE;
 /*!40000 ALTER TABLE `product` DISABLE KEYS */;
+INSERT INTO `product` VALUES (1,'3만원권 멤버십 선불상품','본 상품의 유효기간은 구매일로부터 1년입니다. 유효기간 이후 잔액은 소멸처리 됩니다.',30000),(2,'5만원권 멤버십 선불상품','본 상품의 유효기간은 구매일로부터 1년입니다. 유효기간 이후 잔액은 소멸처리 됩니다.',50000),(3,'7만원권 멤버십 선불상품','본 상품의 유효기간은 구매일로부터 1년입니다. 유효기간 이후 잔액은 소멸처리 됩니다.',70000),(4,'10만원권 멤버십 선불상품','본 상품의 유효기간은 구매일로부터 1년입니다. 유효기간 이후 잔액은 소멸처리 됩니다.',100000);
 /*!40000 ALTER TABLE `product` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -390,17 +412,18 @@ CREATE TABLE `product_record` (
   `product_record_id` int(10) NOT NULL AUTO_INCREMENT,
   `uid` int(10) NOT NULL,
   `product_id` int(10) NOT NULL,
-  `status` varchar(20) NOT NULL  Check (status IN ('Y', 'N')),
+  `status` varchar(20) NOT NULL,
   `product_price` int(20) NOT NULL,
   `product_count` int(20) NOT NULL DEFAULT 1,
-  `all_price` int(20) NOT NULL,
   `date` datetime NOT NULL,
+  `all_price` int(20) NOT NULL,
   PRIMARY KEY (`product_record_id`),
   KEY `uid_FK` (`uid`),
   KEY `product_id_FK` (`product_id`),
   CONSTRAINT `product_id_FK` FOREIGN KEY (`product_id`) REFERENCES `product` (`product_id`),
-  CONSTRAINT `uid_FK2` FOREIGN KEY (`uid`) REFERENCES `user` (`uid`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+  CONSTRAINT `uid_FK2` FOREIGN KEY (`uid`) REFERENCES `user` (`uid`),
+  CONSTRAINT `CONSTRAINT_1` CHECK (`status` in ('Y','N'))
+) ENGINE=InnoDB AUTO_INCREMENT=36 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -409,6 +432,7 @@ CREATE TABLE `product_record` (
 
 LOCK TABLES `product_record` WRITE;
 /*!40000 ALTER TABLE `product_record` DISABLE KEYS */;
+INSERT INTO `product_record` VALUES (23,1,1,'Y',30000,1,'2022-04-28 10:17:18',30000),(24,1,3,'Y',70000,3,'2022-04-28 10:17:38',210000),(25,2,2,'Y',50000,2,'2022-04-28 10:18:00',100000),(26,1,2,'Y',50000,2,'2022-05-10 17:42:25',100000),(27,11,4,'Y',100000,3,'2022-05-13 16:12:10',300000),(28,11,3,'Y',70000,2,'2022-05-13 16:46:21',140000),(29,11,3,'Y',70000,1,'2022-05-13 16:47:15',70000),(30,11,2,'Y',50000,1,'2022-05-13 16:48:59',50000),(31,11,3,'Y',70000,1,'2022-05-13 16:49:19',70000),(32,11,2,'Y',50000,1,'2022-05-13 16:49:50',50000),(33,11,2,'Y',50000,1,'2022-05-13 16:50:15',50000),(34,11,1,'Y',30000,1,'2022-05-13 16:52:18',30000),(35,10,4,'Y',100000,5,'2022-05-24 11:46:09',500000);
 /*!40000 ALTER TABLE `product_record` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -426,14 +450,15 @@ CREATE TABLE `report_board` (
   `device_id` int(10) NOT NULL,
   `context` varchar(255) NOT NULL,
   `date` datetime NOT NULL,
-  `status` varchar(20) NOT NULL DEFAULT 'N' Check (status IN ('Y', 'N')),
+  `status` varchar(20) NOT NULL DEFAULT 'N',
   PRIMARY KEY (`report_id`),
   KEY `uid_FK` (`uid`),
   KEY `station_id_FK` (`station_id`),
   KEY `device_id_FK` (`device_id`),
   CONSTRAINT `device_id_FK2` FOREIGN KEY (`device_id`) REFERENCES `charge_device` (`device_id`),
   CONSTRAINT `station_id_FK4` FOREIGN KEY (`station_id`) REFERENCES `charge_station` (`station_id`),
-  CONSTRAINT `uid_FK6` FOREIGN KEY (`uid`) REFERENCES `user` (`uid`)
+  CONSTRAINT `uid_FK6` FOREIGN KEY (`uid`) REFERENCES `user` (`uid`),
+  CONSTRAINT `CONSTRAINT_1` CHECK (`status` in ('Y','N'))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -498,9 +523,9 @@ CREATE TABLE `user` (
   `payment_card_number` varchar(50) DEFAULT NULL,
   `membership_card_number` varchar(50) DEFAULT NULL,
   `point` int(255) NOT NULL DEFAULT 0,
-  `rfid` varchar(255) DEFAULT NULL,
+  `rfid` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`uid`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -509,6 +534,7 @@ CREATE TABLE `user` (
 
 LOCK TABLES `user` WRITE;
 /*!40000 ALTER TABLE `user` DISABLE KEYS */;
+INSERT INTO `user` VALUES (1,'cho','12345','조윤식','yscho20@koolsign.net','010-3288-6714','서울특별시 구로구 디지털로27바길 27','현대 아이오닉 5','00바 0000','토스뱅크','5327501015763628','0000000000000000',340000,'aa01010493e3ae4993ff'),(2,'cho0','12345','정복순','yscho11@koolsign.net','010-1111-1111','서울특별시 구로구 디지털로27바길 27','현대 아이오닉 5','11바 1111',NULL,NULL,NULL,100000,'aa01010493e3ae4993f0'),(3,'cho1','12345','김복돌','yscho30@koolsign.net','010-0000-0000','서울특별시 구로구 디지털로27바길 27','현대 아이오닉 5','22바 2222',NULL,NULL,NULL,0,'aa01010493e3ae4993f1'),(4,'cho2','12345','김복돌','yscho00@koolsign.net','010-0000-0000','서울특별시 구로구 디지털로27바길 27','현대 아이오닉 5','00바 0000',NULL,NULL,NULL,0,'aa01010493e3ae4993f2'),(9,'soo','12345','이수경','test@naver.com','010-1234-5678','서울특별시 구로구','ev6','12모 1234','기업은행','0000000000000000','0000000000000000',0,'aa01010493e3ae4993f3'),(10,'ddd','dddd','ddd','dddd@koolsign.net','010-0000-0000','','현대 아이오닉5','11바 1111','하나은행','0000000000000000','0000000000000000',500000,'aa01010493e3ae4993f4'),(11,'ccc','cccc','cccc','cccc@cccc','01011112222','','3','123c 1111','','','',760000,'aa01010493e3ae4993f5'),(12,'ccc','cccc','cccc','ccc@cccc','01011112222','','2','ccccccccc','','','',0,'aa01010493e3ae4993f6'),(13,'ccc','cccc','cccc','ccc@cccc','01011112222','','1','ccccccccc','','','',0,'aa01010493e3ae4993f7'),(14,'aa','aa','aa','yscho00@koolsign.net','010-0000-0000','서울특별시 구로구 디지털로27바길 27','현대 아이오닉 5','00바 0000',NULL,NULL,NULL,0,'aa01010493e3ae4993f8');
 /*!40000 ALTER TABLE `user` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -521,4 +547,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-04-22  9:34:44
+-- Dump completed on 2022-05-27 16:54:39

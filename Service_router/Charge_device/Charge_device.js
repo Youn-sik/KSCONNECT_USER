@@ -32,7 +32,6 @@ router.get("/list", (request, response)=> {
                         device_status: element.device_status,
                         device_last_state: element.last_state,
                         device_number: element.device_number,
-                        purpose: element.purpose,
                         station_info: {
                             station_name: element.stations_name,
                             station_status: element.station_status,
@@ -42,7 +41,8 @@ router.get("/list", (request, response)=> {
                             park_fee: element.park_fee,
                             pay_type: element.pay_type,
                             company_name: element.company_name,
-                            company_number: element.company_number
+                            company_number: element.company_number,
+                            purpose: element.purpose,
                         }
                     }
                     charge_devices.push(charge_station_obj)
@@ -130,7 +130,6 @@ router.post("/register", (request, response)=> {
         let available = request.body.available
         let status = request.body.status
         let device_number = request.body.device_number
-        let purpose = request.body.purpose
 
         const charge_device_obj = {
             station_id: station_id,
@@ -140,8 +139,7 @@ router.post("/register", (request, response)=> {
             charge_way: charge_way,
             available: available,
             status: status,
-            device_number: device_number,
-            purpose: purpose
+            device_number: device_number
         }
 
         mysqlConn.connectionService.query("insert into charge_device set ?", charge_device_obj, (err, rows)=> {

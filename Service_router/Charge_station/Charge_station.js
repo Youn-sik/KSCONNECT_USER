@@ -29,7 +29,8 @@ router.get("/list", (request, response)=> {
                             company_name: element.company_name,
                             company_number: element.company_number,
                             lat: element.lat,
-                            longi: element.longi
+                            longi: element.longi,
+                            purpose: element.purpose
                         }
                         charge_station.push(charge_station_obj)
                     });
@@ -37,7 +38,7 @@ router.get("/list", (request, response)=> {
                 }
             })
         } else {
-            mysqlConn.connectionService.query("select station_id, charge_station.company_id, charge_station.name, status, last_state, " +
+            mysqlConn.connectionService.query("select station_id, charge_station.company_id, charge_station.name, status, last_state, purpose, " +
             "address, available, park_fee, company.name as company_name, company_number, lat, longi from charge_station inner join " +
             "company on charge_station.company_id = company.company_id", (err, rows)=> {
                 if(err) {
@@ -57,7 +58,8 @@ router.get("/list", (request, response)=> {
                             company_name: element.company_name,
                             company_number: element.company_number,
                             lat: element.lat,
-                            longi: element.longi
+                            longi: element.longi,
+                            purpose: element.purpose
                         }
                         charge_stations.push(charge_station_obj)
                     })
@@ -99,7 +101,7 @@ router.post("/list", (request, response)=> {
 
         mysqlConn.connectionService.query("select " +
         // "cd.device_id ,cd.name as cd_name, sirial, charge_type, charge_way, cd.available as cd_available, cd.status as cd_status, cd.last_state as cd_last_state, device_number, purpose, " +
-        "cs.station_id, cs.name as cs_name, cs.status as cs_status, cs.last_state as cs_last_state, address, cs.available as cs_available, park_fee, pay_type, lat, longi, " +
+        "cs.station_id, cs.name as cs_name, cs.status as cs_status, cs.last_state as cs_last_state, address, cs.available as cs_available, park_fee, pay_type, lat, longi, purpose, " +
         "c.name as c_name, company_number " +
         "from charge_device as cd " +
         "inner join charge_station as cs on cs.station_id = cd.station_id " +
@@ -114,6 +116,7 @@ router.post("/list", (request, response)=> {
                 console.log(rows)
                 let station_arr = []
                 rows.forEach((element, _) => {
+                    console.log(element)
                     let station_info = {
                             station_id: element.station_id,
                             name: element.cs_name,
@@ -125,6 +128,7 @@ router.post("/list", (request, response)=> {
                             pay_type: element.pay_type,
                             lat: element.lat,
                             longi: element.longi,
+                            purpose: element.purpose,
                             company: element.c_name,
                             company_number: element.company_number,
                     }
@@ -161,8 +165,7 @@ router.post("/detail", (request, response)=> {
                         available: element.available,
                         status: element.status,
                         last_state: element.last_state,
-                        device_number: element.device_number,
-                        purpose: element.purpose
+                        device_number: element.device_number
                     }
                     charge_device_arr.push(charge_device_obj)
                 })
@@ -186,6 +189,7 @@ router.post("/register", (request, response)=> {
         let pay_type = request.body.pay_type
         let lat = request.body.lat
         let longi = request.body.longi
+        let purpose = request.body.purpose
 
         const charge_station_obj = {
             company_id: company_id,
@@ -196,7 +200,8 @@ router.post("/register", (request, response)=> {
             park_fee: park_fee,
             pay_type: pay_type,
             lat: lat,
-            longi: longi
+            longi: longi,
+            purpose: purpose
         }
 
         mysqlConn.connectionService.query("insert into charge_station set ?", charge_station_obj, (err, rows)=> {
@@ -204,7 +209,10 @@ router.post("/register", (request, response)=> {
                 console.error(err)
                 response.status(400).send({result: false, errStr: "충전소 등록중 문제가 발생하였습니다."})
             } else {
+                // console.log(rows) 
                 response.send({result: true, errStr: ""})
+
+                // fn.charege_device_create(rows.insertId)
             }
         })
     } catch(err) {
@@ -220,6 +228,24 @@ router.put("/modify", (request, response)=> {
         console.error(err)
         response.status(400).send({result: false, errStr:"잘못된 형식 입니다."})
     }
+})
+
+router.get("/charge_point/list", (request, response)=> {
+    mysqlConn.connectionService.query("select station_id from charge_station", (err, rows)=> {
+                if(err) {
+                    console.error(err)
+                    response.status(400).send({result: false, errStr: "충전소 정보를 가져오는중 문제가 발생하였습니다.", charge_stations: []})
+                } else {
+                    let charge_stations = []
+                    rows.forEach((element, _)=> {
+                        let charge_station_obj = {
+                            station_id: element.station_id,
+                        }
+                        charge_stations.push(charge_station_obj)
+                    })
+                    response.send({charge_stations: charge_stations})
+                }
+            })
 })
 
 module.exports = router
