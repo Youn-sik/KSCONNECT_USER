@@ -27,6 +27,7 @@ const Service_Charge_Device = require("./Service_router/Charge_device/Charge_dev
 const Service_Notice_Board = require("./Service_router/Notice_board/Notice_board")
 const Service_FAQ_Board = require("./Service_router/FAQ_board/FAQ_board")
 const Service_Inquiry_Board = require("./Service_router/Inquiry_Board/Inquiry_Board")
+const Payment = require("./Service_router/Payment/Payment")
 
 // const mysqlStoreOption = {
 //     host: kepco_info.mysql_host,
@@ -125,6 +126,7 @@ app.use("/charge_device", Service_Charge_Device)
 app.use("/notice_board", Service_Notice_Board)
 app.use("/FAQ_board", Service_FAQ_Board)
 app.use("/inquiry_board", Service_Inquiry_Board)
+app.use("/payment", Payment)
 
 app.listen("4000", ()=> {
     console.log("[SERVER] > Backend application is listening on port: "+ 4000)
