@@ -89,7 +89,8 @@ router.post("/signup", (request, response)=> {
                 console.error(err)
                 response.status(400).send({result: false, errStr: "회원 가입 중 문제가 발생하였습니다."})
             } else {
-                console.log(rows)
+                // console.log(rows)
+                // console.log(rows.insertId)
                 response.send({result: true, errStr: ""})
             }
         });
@@ -112,8 +113,10 @@ router.put("/edit", (request, response)=> {
                 console.error(err)
                 response.status(400).send({result: false, errStr: "회원 정보 수정 중 문제가 발생하였습니다."})
             } else {
-                console.log(rows)
+                // console.log(rows)
                 response.send({result: true, errStr: ""})
+                
+                // fn.user_info_update(request.decoded.uid)
             }
         });
         // */
@@ -289,10 +292,31 @@ router.get("/charge_record", (request, response)=> {
                 response.send({result: true, errStr: "", charge_records: charge_records})
             }
         })
+
+
     } catch(err) {
         console.error(err)
         response.status(400).send({result: false, errStr:"잘못된 형식 입니다."})
     }
+})
+
+
+router.get("/list", (request, response)=> {
+    mysqlConn.connectionService.query("select rfid from user", (err, rows)=> {
+        if(err) {
+            console.error(err)
+            response.status(400).send({result: false, errStr: "rfid 정보를 가져오는중 문제가 발생하였습니다.", charge_stations: []})
+        } else {
+            let charge_stations = []
+            rows.forEach((element, _)=> {
+                let charge_station_obj = {
+                    idTag: element.rfid,
+                }
+                charge_stations.push(charge_station_obj)
+            })
+            response.send({user_idTags: charge_stations})
+        }
+    })
 })
 
 module.exports = router

@@ -8,7 +8,9 @@ const client = mqtt.connect({
     clean: true,
     keepalive: 60,
     reconnectioniPeriod: 5000,
-    connectTimeout: 15000
+    connectTimeout: 15000,
+    resubscribe: false,
+    useNewUrlParser: true,
 })
 
 client.on('error',function (err) {
