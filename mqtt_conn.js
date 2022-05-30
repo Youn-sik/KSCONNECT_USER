@@ -39,7 +39,7 @@ client.on('connect', ()=> {
 
             setTimeout(()=> {
                 // end transaction test
-                let tmp = '{"transactionId": "347174","device_id": "connectorId","rfid": "aa01010493e3ae4993ff", "timestamp": "2022-01-01T08:00:00", "meterEnd": "100"}'
+                let tmp = '{"transactionId": "347174", "rfid": "aa01010493e3ae4993ff", "timestamp": "2022-01-01T08:00:00", "meterEnd": "100"}'
                 fn.transaction_stop(JSON.parse(tmp))
             }, 10000)
         }

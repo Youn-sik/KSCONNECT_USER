@@ -169,6 +169,7 @@ module.exports = {
     },
 
     async transaction_stop(info) {
+        // console.log(info)
         let mongo_obj = {}
         let timestamp = moment(info.timestamp).add(9, 'h').format('YYYY-MM-DDTHH:mm:ss')
 
@@ -254,7 +255,7 @@ module.exports = {
                     })
                 }),
                 new Promise((resolve, reject)=> {
-                    mysqlConn.connectionService.query("update charge_device set status = 'Y', last_state = ? where device_id = ?", [timestamp, info.device_id], (err, rows)=> {
+                    mysqlConn.connectionService.query("update charge_device set status = 'Y', last_state = ? where device_id = ?", [timestamp, mongo_obj.device_id], (err, rows)=> {
                         if(err) {
                             console.error(err)
                             reject(err)
@@ -273,37 +274,40 @@ module.exports = {
                         }
                     })
                 }),
-                new Promise((resolve, reject)=> {
-                    mysqlConn.connectionService.query("select status from charge_device where station_id = ?", mongo_obj.chargePointId, (err, rows)=> {
-                        if(err) {
-                            console.error(err)
-                            reject()
-                        } else {
-                            let device_status_arr = []
-                            rows.forEach(element => {
-                                device_status_arr.push(element)
-                            });
-
-                            let status = "N"
-                            if(device_status_arr.includes("Y")) status = "Y"
-                            else if(!device_status_arr.includes("Y")) {
-                                if(device_status_arr.includes("I")) status = "I"
-                                else if(device_status_arr.includes("F")) status = "F"
-                            }
-
-                            mysqlConn.connectionService.query("update charge_station set status = ? where station_id = ?", [status, mongo_obj.chargePointId], (err, rows)=> {
-                                if(err) {
-                                    console.error(err)
-                                    reject()
-                                } else {
-                                    resolve()
-                                }
-                            })
-                        }
-                    })
-                }),
             ]).then((values)=> {
                 // console.log(values)
+
+                mysqlConn.connectionService.query("select status from charge_device where station_id = ?", mongo_obj.chargePointId, (err, rows)=> {
+                    if(err) {
+                        console.error(err)
+                        // reject()
+                    } else {
+                        // console.log(rows)
+                        let device_status_arr = []
+                        rows.forEach(element => {
+                            device_status_arr.push(element.status)
+                        });
+
+                        let status = "N"
+                        if(device_status_arr.includes("Y")) status = "Y"
+                        else if(!device_status_arr.includes("Y")) {
+                            if(device_status_arr.includes("I")) status = "I"
+                            else if(device_status_arr.includes("F")) status = "F"
+                        }
+
+                        // console.log(device_status_arr)
+                        // console.log(status)
+
+                        mysqlConn.connectionService.query("update charge_station set status = ? where station_id = ?", [status, mongo_obj.chargePointId], (err, rows)=> {
+                            if(err) {
+                                console.error(err)
+                                // reject()
+                            } else {
+                                // resolve()
+                            }
+                        })
+                    }
+                })
 
                 let send_data = {
                     user_info: values[0],
