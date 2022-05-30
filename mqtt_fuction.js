@@ -82,7 +82,7 @@ module.exports = {
     async transaction_start(info) {
         new Promise((resolve, reject)=> {
 
-                mysqlConn.connectionService.query("update charge_device set status = 'N' where device_id = ?", info.device_id, (err, rows)=> {
+                mysqlConn.connectionService.query("update charge_device set status = 'I' where device_id = ?", info.device_id, (err, rows)=> {
                     if(err) {
                         console.error(err)
                         reject(err)
@@ -145,14 +145,16 @@ module.exports = {
                 }),
             ]).then((values)=> {
                 // console.log(values)
-    
+                
+                let timestamp = moment(info.timestamp).add(9, 'h').format('YYYY-MM-DDTHH:mm:ss')
                 let send_data = {
                     user_info: values[0],
                     charge_info: values[1],
-                    timestamp: info.timestamp
+                    timestamp: timestamp
                 }
     
-                // console.log(JSON.stringify(send_data))
+                // console.log(info.timestamp)
+                // console.log(timestamp)
         
                 client.publish("/alert/charge/start/" + values[0].uid, JSON.stringify(send_data))
     
@@ -168,6 +170,7 @@ module.exports = {
 
     async transaction_stop(info) {
         let mongo_obj = {}
+        let timestamp = moment(info.timestamp).add(9, 'h').format('YYYY-MM-DDTHH:mm:ss')
 
         new Promise((resolve, reject)=> {
             MongoDB.collection("transactions").find({"transactionId" : parseInt(info.transactionId)}).toArray(async (err, result)=> {
@@ -176,7 +179,7 @@ module.exports = {
                     reject(err)
                 }
                 // console.log(result)
-
+                let chargePointId = await (result[0].chargePointId)
                 let amount = await (result[0].meterStop - result[0].meterStart)
                 let rfid = await (result[0].idTag)
                 let device_id = await (result[0].connectorId)
@@ -184,6 +187,7 @@ module.exports = {
                 let stopTime = await (result[0].stopTime)
 
                 mongo_obj = {
+                    chargePointId: chargePointId,
                     amount: amount,
                     rfid: rfid,
                     device_id: device_id,
@@ -193,7 +197,7 @@ module.exports = {
                 resolve(mongo_obj)
             })
         }).then((mongo_obj)=> {
-            console.log(mongo_obj)
+            // console.log(mongo_obj)
             Promise.all([
                 new Promise((resolve, reject)=> {
                     mysqlConn.connectionService.query("select * from user where rfid = ?", info.rfid, (err, rows)=> {
@@ -249,13 +253,62 @@ module.exports = {
                         }
                     })
                 }),
+                new Promise((resolve, reject)=> {
+                    mysqlConn.connectionService.query("update charge_device set status = 'Y', last_state = ? where device_id = ?", [timestamp, info.device_id], (err, rows)=> {
+                        if(err) {
+                            console.error(err)
+                            reject(err)
+                        } else {
+                            resolve()
+                        }
+                    })
+                }),
+                new Promise((resolve, reject)=> {
+                    mysqlConn.connectionService.query("update charge_station set last_state = ? where station_id = ?", [timestamp, mongo_obj.chargePointId], (err, rows)=> {
+                        if(err) {
+                            console.error(err)
+                            reject(err)
+                        } else {
+                            resolve()
+                        }
+                    })
+                }),
+                new Promise((resolve, reject)=> {
+                    mysqlConn.connectionService.query("select status from charge_device where station_id = ?", mongo_obj.chargePointId, (err, rows)=> {
+                        if(err) {
+                            console.error(err)
+                            reject()
+                        } else {
+                            let device_status_arr = []
+                            rows.forEach(element => {
+                                device_status_arr.push(element)
+                            });
+
+                            let status = "N"
+                            if(device_status_arr.includes("Y")) status = "Y"
+                            else if(!device_status_arr.includes("Y")) {
+                                if(device_status_arr.includes("I")) status = "I"
+                                else if(device_status_arr.includes("F")) status = "F"
+                            }
+
+                            mysqlConn.connectionService.query("update charge_station set status = ? where station_id = ?", [status, mongo_obj.chargePointId], (err, rows)=> {
+                                if(err) {
+                                    console.error(err)
+                                    reject()
+                                } else {
+                                    resolve()
+                                }
+                            })
+                        }
+                    })
+                }),
             ]).then((values)=> {
                 // console.log(values)
-    
+
                 let send_data = {
                     user_info: values[0],
                     charge_info: values[1],
-                    timestamp: info.timestamp
+                    timestamp: timestamp
                 }
     
                 // console.log(JSON.stringify(send_data))
@@ -290,9 +343,10 @@ module.exports = {
                     }).then((res)=> {
                         if(res.code == undefined) { // 에러가 없다면
                             let billingKey = res.data.billingKey
-                            console.log(billingKey)
+                            // console.log(billingKey)
 
                             let totalAmount = mongo_obj.amount * 292.1 // mysql에서 현재 가격 갖고 와야함
+                            // console.log(totalAmount) // 0 나와서 지원 안된다고 함
                             
                             axios.post("http://172.16.38.157:4000/payment/pay", {
                                 "billingKey": billingKey,

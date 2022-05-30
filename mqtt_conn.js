@@ -31,23 +31,17 @@ client.on('connect', ()=> {
         } else {
             console.log('MQTT subscribed.');
 
-            // client.publish('/alert/charge/start/',JSON.stringify({"test": "test"}));
+            setTimeout(()=> {
+                // start transaction test
+                let tmp1 = '{"device_id": "1","rfid": "aa01010493e3ae4993ff","timestamp": "2022-01-01T00:00:00", "meterStart": "0"}'
+                fn.transaction_start(JSON.parse(tmp1))
+            }, 5000)
 
             setTimeout(()=> {
-                // client.publish('/ack/csms',JSON.stringify({"status": "ok"}));
-
-                // start transaction test
-                let tmp1 = '{"device_id": "1","rfid": "aa01010493e3ae4993ff","timestamp": "2022-01-01T00:00:00"}'
-                // fn.transaction_start(JSON.parse(tmp1))
-
                 // end transaction test
-
-                let tmp = '{"transactionId": "699055","device_id": "connectorId","rfid": "aa01010493e3ae4993ff", "timestamp": "2022-01-01T08:00:00"}'
-
+                let tmp = '{"transactionId": "347174","device_id": "connectorId","rfid": "aa01010493e3ae4993ff", "timestamp": "2022-01-01T08:00:00", "meterEnd": "100"}'
                 fn.transaction_stop(JSON.parse(tmp))
-
-            }, 5000)
-            // client.publish('/ack/service',JSON.stringify({"test": "test"}));
+            }, 10000)
         }
     });
 });
