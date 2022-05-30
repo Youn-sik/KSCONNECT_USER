@@ -274,15 +274,15 @@ module.exports = {
 
                     
                     axios.post("http://172.16.38.157:4000/payment/billingkey", {
-                        // cardNumber: "5327501015763628",
-                        // cardExpirationYear: "27",
-                        // cardExpirationMonth: "01",
-                        // cardPassword: "05"
-
-                        cardNumber: "9490942909837164",
+                        cardNumber: "5327501015763628",
                         cardExpirationYear: "27",
-                        cardExpirationMonth: "10",
+                        cardExpirationMonth: "01",
                         cardPassword: "05"
+
+                        // cardNumber: "9490942909837164",
+                        // cardExpirationYear: "27",
+                        // cardExpirationMonth: "10",
+                        // cardPassword: "05"
                     },{
                         headers: {
                             "authorization": token
@@ -297,6 +297,7 @@ module.exports = {
                             axios.post("http://172.16.38.157:4000/payment/pay", {
                                 "billingKey": billingKey,
                                 "amount": totalAmount, //Meter Value 계산해서 넣기
+                                // "amount": 10000, //Meter Value 계산해서 넣기
                                 "orderID": Math.random().toString(36).substr(2, 5),
                                 "orderName": "전기차 충전 요금 정산"
                             },{
