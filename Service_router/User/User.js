@@ -243,6 +243,7 @@ router.get("/charge_record", (request, response)=> {
                 console.error(err)
                 response.status(400).send({result: false, errStr: "충전 내역 조회중 문제가 발생하였습니다.", charge_records: []})
             } else {
+                console.log(rows)
                 let charge_records = []
                 rows.forEach((element, _) => {
                     let charge_record_obj = {
@@ -315,6 +316,24 @@ router.get("/list", (request, response)=> {
                 charge_stations.push(charge_station_obj)
             })
             response.send({user_idTags: charge_stations})
+        }
+    })
+})
+
+router.post("/info/check", (request, response)=> {
+    console.log(request.body)
+    let car_number = request.body.car_number
+
+    mysqlConn.connectionService.query("select rfid from user where car_number = ?", car_number, (err, rows)=> {
+        if(err) {
+            console.error(err)
+            response.status(400).send({result: false, errStr: "rfid 정보를 가져오는중 문제가 발생하였습니다.", charge_stations: []})
+        } else {
+            if(rows.length == 0) {
+                response.send({result: false, errStr: "등록되지 않은 사용자 입니다."})
+            } else {
+                response.send({result: true, errStr: "", rfid: rows[0].rfid})
+            }
         }
     })
 })

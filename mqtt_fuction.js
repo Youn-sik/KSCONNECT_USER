@@ -406,7 +406,7 @@ module.exports = {
                                         if(err) {
                                             console.error(err)
                                         } else {
-                                            console.log(rows)
+                                            // console.log(rows)
                                         }
                                     })
 
