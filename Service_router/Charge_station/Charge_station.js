@@ -167,7 +167,7 @@ router.post("/list/search", (request, response)=> {
             charge_way_arr.push(false)
             charge_way_arr.push(false)
         }
-        console.log(address, charge_way_arr)
+        // console.log(address, charge_way_arr)
 
         if(address == false) {
             mysqlConn.connectionService.query("select " +
@@ -184,7 +184,7 @@ router.post("/list/search", (request, response)=> {
                     console.error(err)
                     response.status(400).send({result: false, errStr: "충전소 목록을 가져오는중 문제가 발생하였습니다.", charge_stations: []})
                 } else {
-                    console.log(rows)
+                    // console.log(rows)
                     let station_arr = []
                     rows.forEach((element, _) => {
                         console.log(element)
@@ -224,7 +224,7 @@ router.post("/list/search", (request, response)=> {
                     console.error(err)
                     response.status(400).send({result: false, errStr: "충전소 목록을 가져오는중 문제가 발생하였습니다.", charge_stations: []})
                 } else {
-                    console.log(rows)
+                    // console.log(rows)
                     let station_arr = []
                     rows.forEach((element, _) => {
                         console.log(element)

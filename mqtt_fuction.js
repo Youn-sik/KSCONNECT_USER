@@ -231,7 +231,7 @@ module.exports = {
                 }),
                 new Promise((resolve, reject)=> {
                     mysqlConn.connectionService.query("select cs.name as cs_name, cs.address as cs_addredd, cs.lat as cs_lat, cs.longi as cs_longi, "+
-                    "cd.name as cd_name, cd.device_number as cd_device_number " +
+                    "cd.name as cd_name, cd.device_number as cd_device_number, cd.charge_type as cd_charge_type, cd.charge_way as cd_charge_way " +
                     "from charge_device as cd inner join charge_station as cs on cs.station_id = cd.station_id where cd.device_id = ?", mongo_obj.device_id, (err, rows)=> {
                         if(err) {
                             console.error(err)
@@ -247,7 +247,9 @@ module.exports = {
                                 },
                                 charge_device: {
                                     name: rows[0].cd_name,
-                                    device_number: rows[0].cd_device_number
+                                    device_number: rows[0].cd_device_number,
+                                    charge_type: rows[0].cd_charge_type,
+                                    charge_way: rows[0].cd_charge_way
                                 }
                             }
                             resolve(charge_info_tmp)
@@ -308,7 +310,7 @@ module.exports = {
                         })
                     }
                 })
-
+                // console.log(values[1])
                 let send_data = {
                     user_info: values[0],
                     charge_info: values[1],
@@ -349,7 +351,8 @@ module.exports = {
                             let billingKey = res.data.billingKey
                             // console.log(billingKey)
 
-                            let totalAmount = mongo_obj.amount * 292.1 // mysql에서 현재 가격 갖고 와야함
+                            // 경부하 중간부하 최대부하 시간 계산해서 적용하기. 우선 예시 값: 292.1
+                            let totalAmount = mongo_obj.amount * 292.1 
                             // console.log(totalAmount) // 0 나와서 지원 안된다고 함
                             
                             axios.post("http://172.16.38.157:4000/payment/pay", {
@@ -365,8 +368,47 @@ module.exports = {
                             }).then((response)=> { // 에러가 없다면
                                 if(response.code == undefined) {
                                     let send_data = response.data
-                                    console.log(send_data)
+                                    // console.log(send_data)
                                     client.publish("/alert/pay/end/" + values[0].uid, JSON.stringify({send_data})) // topic uid 수정 필요
+
+                                    // console.log(values)
+                                    // 경부하 중간부하 최대부하 시간 계산해서 적용하기. 우선 예시 값: 292.1
+                                    let charge_record_obj = {
+                                        uid: values[0].uid,
+                                        station_id: mongo_obj.chargePointId,
+                                        device_id: mongo_obj.device_id,
+                                        emaid: values[0].rfid,
+                                        status: "N",
+                                        car_model: values[0].car_model,
+                                        car_number: values[0].car_number,
+                                        pay_card_company: values[0].payment_card_company,
+                                        pay_card_number: values[0].payment_card_number,
+                                        pay_method: "신용카드",
+                                        pay_status: "Y",
+                                        charge_st_date: moment(mongo_obj.startTime).add(9, 'h').format('YYYY-MM-DDTHH:mm:ss'),
+                                        charge_end_date: moment(mongo_obj.stopTime).add(9, 'h').format('YYYY-MM-DDTHH:mm:ss'),
+                                        charge_kwh: mongo_obj.amount,
+                                        charge_kwh1: mongo_obj.amount,
+                                        charge_kwh2: 0,
+                                        charge_kwh3: 0,
+                                        charge_amt: totalAmount,
+                                        charge_amt1: totalAmount,
+                                        charge_amt2: 0,
+                                        charge_amt3: 0,
+                                        sp_ucost1: 292.1,
+                                        sp_ucost2: 292.1,
+                                        sp_ucost3: 292.1,
+                                        charge_type: values[1].charge_device.charge_type,
+                                        charge_way: values[1].charge_device.charge_way,
+                                    }
+
+                                    mysqlConn.connectionService.query("insert into charge_record set ?", charge_record_obj, (err, rows)=> {
+                                        if(err) {
+                                            console.error(err)
+                                        } else {
+                                            console.log(rows)
+                                        }
+                                    })
 
                                 } else { // 에러가 있다면 
                                     console.error(response)
