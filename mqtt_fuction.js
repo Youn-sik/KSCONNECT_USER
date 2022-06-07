@@ -146,7 +146,10 @@ module.exports = {
             ]).then((values)=> {
                 // console.log(values)
                 
-                let timestamp = moment(info.timestamp).add(9, 'h').format('YYYY-MM-DDTHH:mm:ss')
+                // let timestamp = moment(info.timestamp).add(9, 'h').format('YYYY-MM-DDTHH:mm:ss')
+                let timestamp = moment(info.timestamp).format('YYYY-MM-DDTHH:mm:ss')
+                console.log(info.timestamp)
+                console.log(timestamp)
                 let send_data = {
                     user_info: values[0],
                     charge_info: values[1],
@@ -171,7 +174,8 @@ module.exports = {
     async transaction_stop(info) {
         // console.log(info)
         let mongo_obj = {}
-        let timestamp = moment(info.timestamp).add(9, 'h').format('YYYY-MM-DDTHH:mm:ss')
+        // let timestamp = moment(info.timestamp).add(9, 'h').format('YYYY-MM-DDTHH:mm:ss')
+        let timestamp = moment(info.timestamp).format('YYYY-MM-DDTHH:mm:ss')
 
         new Promise((resolve, reject)=> {
             MongoDB.collection("transactions").find({"transactionId" : parseInt(info.transactionId)}).toArray(async (err, result)=> {
@@ -314,7 +318,8 @@ module.exports = {
                 let send_data = {
                     user_info: values[0],
                     charge_info: values[1],
-                    timestamp: timestamp
+                    timestamp: timestamp,
+                    amount: mongo_obj.amount
                 }
     
                 // console.log(JSON.stringify(send_data))
@@ -385,8 +390,8 @@ module.exports = {
                                         pay_card_number: values[0].payment_card_number,
                                         pay_method: "신용카드",
                                         pay_status: "Y",
-                                        charge_st_date: moment(mongo_obj.startTime).add(9, 'h').format('YYYY-MM-DDTHH:mm:ss'),
-                                        charge_end_date: moment(mongo_obj.stopTime).add(9, 'h').format('YYYY-MM-DDTHH:mm:ss'),
+                                        charge_st_date: moment(mongo_obj.startTime).format('YYYY-MM-DDTHH:mm:ss'),
+                                        charge_end_date: moment(mongo_obj.stopTime).format('YYYY-MM-DDTHH:mm:ss'),
                                         charge_kwh: mongo_obj.amount,
                                         charge_kwh1: mongo_obj.amount,
                                         charge_kwh2: 0,
@@ -432,6 +437,12 @@ module.exports = {
         }).catch((err)=> {
             console.error(err)
         })
+    },
+
+    async meter_value(data) {
+        console.log(data)
+        // client.publish("/alert/charge/status/" + values[0].uid, JSON.stringify(send_data))
+        
     },
 
 }

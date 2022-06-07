@@ -16,7 +16,7 @@ app.use(bodyParser.json())
 
 let tmp1 = '{"device_id": "1","rfid": "aa01010493e3ae4993ff","timestamp": "2022-01-01T00:00:00"}'
 
-let tmp = '{"transactionId": "699055","device_id": "connectorId","rfid": "aa01010493e3ae4993ff", "timestamp": ""}'
+let tmp = '{"transactionId": "347174","device_id": "connectorId","rfid": "aa01010493e3ae4993ff", "timestamp": "2022-01-01T08:00:00"}'
 
                 
 

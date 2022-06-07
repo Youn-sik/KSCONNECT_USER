@@ -283,7 +283,7 @@ CREATE TABLE `inquiry_board` (
   `title` varchar(50) NOT NULL,
   `context` varchar(255) NOT NULL,
   `date` datetime NOT NULL,
-  `status` varchar(20) NOT NULL DEFAULT 'N' Check (status IN ('Y', 'N')),
+  `status` varchar(20) NOT NULL DEFAULT 'N' Check (status IN ('Y', 'N', 'C')),
   PRIMARY KEY (`inquiry_id`),
   KEY `uid_FK` (`uid`),
   CONSTRAINT `uid_FK4` FOREIGN KEY (`uid`) REFERENCES `user` (`uid`)

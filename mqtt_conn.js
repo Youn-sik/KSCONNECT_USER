@@ -8,6 +8,7 @@ client.on('connect', ()=> {
     client.subscribe([
         '/alert/charge/start/+',
         '/alert/charge/end/+',
+        '/alert/charge/status/+',
         '/alert/pay/end/+',
 
         '/ack/service',
@@ -34,13 +35,13 @@ client.on('connect', ()=> {
             setTimeout(()=> {
                 // start transaction test
                 let tmp1 = '{"device_id": "1","rfid": "aa01010493e3ae4993ff","timestamp": "2022-01-01T00:00:00", "meterStart": "0"}'
-                fn.transaction_start(JSON.parse(tmp1))
+                // fn.transaction_start(JSON.parse(tmp1))
             }, 5000)
 
             setTimeout(()=> {
                 // end transaction test
                 let tmp = '{"transactionId": "347174", "rfid": "aa01010493e3ae4993ff", "timestamp": "2022-01-01T08:00:00", "meterEnd": "100"}'
-                fn.transaction_stop(JSON.parse(tmp))
+                // fn.transaction_stop(JSON.parse(tmp))
             }, 10000)
         }
     });
@@ -119,7 +120,13 @@ client.on('message', async function(topic, message) {
         }
 
         if(topic === 'connector/status') {
-            
+            let info  = {
+                station_id: json.chargePointId,
+                device_id: json.connectorId,
+                status: json.status,
+                timestamp: json.timestamp,
+                errorCode: json.errorCode
+            }            
         }
 
         if(topic === 'transaction/started') {
@@ -160,7 +167,12 @@ client.on('message', async function(topic, message) {
         }
 
         if(topic === 'meter/value') {
-            
+            let info = {
+                station_id: json.chargePointId,
+                device_id: json.connectorId,
+                meterValue: json.meterValue
+            }
+            fn.meter_value(info)
         }
 
        
