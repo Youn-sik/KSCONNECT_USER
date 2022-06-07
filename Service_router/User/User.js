@@ -3,6 +3,15 @@ const router = express.Router()
 const mysqlConn = require("../../database_conn")
 const jwt = require("jsonwebtoken")
 
+const kepco_info = require("../../RomingInfo.json")
+const MongoClient = require("mongodb").MongoClient
+let MongoDB
+MongoClient.connect(kepco_info.mongodb_host + ":" + kepco_info.mongodb_port + "/ocppdb", (err, client1)=> {
+    if(err) return console.error(err)
+    console.log("[MONGODB] > 'ocppdb' Database Connected")
+    MongoDB = client1.db("ocppdb")
+})
+
 router.post("/login", (request, response)=> {
     try {
         let id = request.body.id
@@ -243,7 +252,7 @@ router.get("/charge_record", (request, response)=> {
                 console.error(err)
                 response.status(400).send({result: false, errStr: "충전 내역 조회중 문제가 발생하였습니다.", charge_records: []})
             } else {
-                console.log(rows)
+                // console.log(rows)
                 let charge_records = []
                 rows.forEach((element, _) => {
                     let charge_record_obj = {
@@ -301,6 +310,86 @@ router.get("/charge_record", (request, response)=> {
     }
 })
 
+router.get("/charge_status", (request, response)=> {
+    try {
+        mysqlConn.connectionService.query("select * from user where uid = ?", request.decoded.uid, (err, rows)=> {
+            if(err) {
+                console.error(err)
+                response.status(400).send({result: false, errStr: "충전 상태 조회중 문제가 발생하였습니다.", charge_records: []})
+            } else {
+                // console.log(rows[0])
+                let rfid = rows[0].rfid
+                let pay_type = rows[0].pay_type
+                
+                new Promise((resolve, reject)=> {
+                    MongoDB.collection("transactions").find({"idTag" : rfid.toString(), "status": "Active"}).toArray(async (err, result)=> {  
+                        if(err) {
+                            console.error(err) 
+                            response.status(400).send({result: false, errStr: "트랜젝션 검색중 문제가 발생하였습니다."})
+                            reject()
+                        }
+                        if(result.length == 0) {
+                            response.status(400).send({result:false, errStr: "현재 충전중이 아닙니다."})
+                            reject()
+                        }
+                        resolve(result[0])
+                    })
+                }).then((mongo_obj)=> {
+                    // console.log(mongo_obj) 
+                    Promise.all([
+                        new Promise((resolve, reject)=> {
+                            mysqlConn.connectionService.query("select * from charge_station where station_id = ?", mongo_obj.chargePointId, (err, rows)=> {
+                                if(err) {
+                                    console.error(err) 
+                                    response.status(400).send({result: false, errStr: "충전소 검색중 문제가 발생하였습니다."})
+                                    reject()
+                                }
+                                else {
+                                    resolve(rows[0])
+                                }
+                            })
+                        }),
+                        new Promise((resolve, reject)=> {
+                            MongoDB.collection("meters").find({"chargePointId" : mongo_obj.chargePointId, "connectorId": mongo_obj.connectorId}).sort({$natural: -1}).limit(1).toArray(async (err, result)=> {  
+                                if(err) {
+                                    console.error(err) 
+                                    response.status(400).send({result: false, errStr: "트랜젝션 검색중 문제가 발생하였습니다."})
+                                    reject()
+                                }
+                                else if(result.length == 0) {
+                                    response.status(400).send({result:false, errStr: "현재 충전중이 아닙니다."})
+                                    reject()
+                                } else {
+                                    // console.log(result[0].meterValue[0]) // 0은 안씀
+                                    // console.log(result[0].meterValue[1]) // 1을 씀
+                                    let meterValue = result[0].meterValue[1].sampled_value[0]
+                                    // console.log(meterValue)
+                                    resolve(meterValue)
+                                }
+                            })
+                        }) 
+                    ]).then((val)=> {
+                        let send_data = {
+                            charge_station_name: val[0].name,
+                            charge_kwh: (val[1].value - mongo_obj.meterStart),
+                            startTime: mongo_obj.startTime,
+                            charge_amount: (val[1].value * 292.1),
+                            payment_way: "신용카드"
+                        }
+                        // console.log(send_data)
+                        response.send({result: true, errStr: "", value: send_data})
+                    })
+
+                }).catch((err)=> {
+                })
+            }
+        })
+
+    } catch(err) {
+        console.error(err)
+        response.status(400).send({result: false, errStr:"잘못된 형식 입니다."})
+    }
+})
 
 router.get("/list", (request, response)=> {
     mysqlConn.connectionService.query("select rfid from user", (err, rows)=> {
@@ -321,21 +410,39 @@ router.get("/list", (request, response)=> {
 })
 
 router.post("/info/check", (request, response)=> {
-    console.log(request.body)
+    // console.log(request.body)
     let car_number = request.body.car_number
+    let id = request.body.id
 
-    mysqlConn.connectionService.query("select rfid from user where car_number = ?", car_number, (err, rows)=> {
-        if(err) {
-            console.error(err)
-            response.status(400).send({result: false, errStr: "rfid 정보를 가져오는중 문제가 발생하였습니다.", charge_stations: []})
-        } else {
-            if(rows.length == 0) {
-                response.send({result: false, errStr: "등록되지 않은 사용자 입니다."})
+    if(car_number) {
+        mysqlConn.connectionService.query("select rfid from user where car_number = ?", car_number, (err, rows)=> {
+            if(err) {
+                console.error(err)
+                response.status(400).send({result: false, errStr: "rfid 정보를 가져오는중 문제가 발생하였습니다.", charge_stations: []})
             } else {
-                response.send({result: true, errStr: "", rfid: rows[0].rfid})
+                if(rows.length == 0) {
+                    response.send({result: false, errStr: "등록되지 않은 사용자 입니다."})
+                } else {
+                    response.send({result: true, errStr: "", rfid: rows[0].rfid})
+                }
             }
-        }
-    })
+        })
+    } else if(id) {
+        mysqlConn.connectionService.query("select rfid from user where id = ?", id, (err, rows)=> {
+            if(err) {
+                console.error(err)
+                response.status(400).send({result: false, errStr: "rfid 정보를 가져오는중 문제가 발생하였습니다.", charge_stations: []})
+            } else {
+                if(rows.length == 0) {
+                    response.send({result: false, errStr: "등록되지 않은 사용자 입니다."})
+                } else {
+                    response.send({result: true, errStr: "", rfid: rows[0].rfid})
+                }
+            }
+        })
+    } else {
+        response.send({result: false, errStr: "올바르지 않은 형식입니다."})
+    }
 })
 
 module.exports = router
