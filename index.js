@@ -6,6 +6,7 @@ const cookieParser = require("cookie-parser")
 // const fileStore = require("session-file-store")(session)
 const cors = require("cors")
 const jwtAuth = require("./Service_router/middlewares/jwtAuth")
+const FCM = require("fcm-node")
 
 const kepco_info = require("./RomingInfo.json")
 
@@ -130,4 +131,27 @@ app.use("/payment", Payment)
 
 app.listen("4000", ()=> {
     console.log("[SERVER] > Backend application is listening on port: "+ 4000)
+})
+
+let ServerKey = "BJuPuKKyA8zxNBJY7ePovS_udzNHS4mrOzWnl3J5WAwSV9jXFhGd3aqmpD5_71FaagJ9GRiBSE1JJt6xTmAhPg8"
+let testDeviceToken = "c4LgHc5GQHC4OiVaV5IYhi:APA91bGrIaAbrJn74rdJaiGHXJ-5hcvTljM5xne0VVRSFnFNwJQc75hdh0yMGb0-SQlTsVPJlI3G9JXfH4cSWjgZ88hRvD4WHjj-EH9Xkctpml3mqS_EoeJccRenKE9FF3T1G0_wobOC"
+let message = {
+    to: testDeviceToken,
+    notification: {
+        title: 'KOOL CHARGE',
+        body: 'Server Initialization Test'
+    },
+    data: {
+        body: '{"test_result" : "test_ok" }'
+    },
+    priority: 'high'
+}
+let fcm = new FCM(ServerKey)
+fcm.send(message, (err, res)=> {
+    if(err) {
+        console.error(err)
+        console.warn(res)
+    } else {
+        console.log(res)
+    }
 })
