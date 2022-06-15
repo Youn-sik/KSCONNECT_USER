@@ -357,7 +357,7 @@ router.get("/charge_status", (request, response)=> {
                                     reject()
                                 }
                                 else if(result.length == 0) {
-                                    response.status(400).send({result:false, errStr: "현재 충전중이 아닙니다."})
+                                    response.status(204).send({result:false, errStr: "현재 충전중이 아닙니다."})
                                     reject()
                                 } else {
                                     // console.log(result[0].meterValue[0]) // 0은 안씀

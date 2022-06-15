@@ -108,18 +108,32 @@ async function get_charge_price(public) {
                     power = 'M'
                 }
             } 
-            
-            return new Promise((resolve, reject)=> {
-                mysqlConn.connectionService.query("select * from charge_price where public = 'N' and kw100 = 'N' and season = ? and power = ? ", [season, power], (err, rows)=> {
-                    if(err) {
-                        console.error(err)
-                        resolve(null)
-                    } else {
-                        let price = rows[0].price
-                        resolve(price)
-                    }
+
+            if(power == 'L') {
+                return new Promise((resolve, reject)=> {
+                    mysqlConn.connectionService.query("select * from charge_price where public = 'N' and kw100 = 'N' and season = ? and power = ? ", [season, power], (err, rows)=> {
+                        if(err) {
+                            console.error(err)
+                            resolve(null)
+                        } else {
+                            let price = rows[0].price
+                            resolve(price)
+                        }
+                    })
                 })
-            })
+            } else {
+                return new Promise((resolve, reject)=> {
+                    mysqlConn.connectionService.query("select * from charge_price where public = 'N' and season = ? and power = ? ", [season, power], (err, rows)=> {
+                        if(err) {
+                            console.error(err)
+                            resolve(null)
+                        } else {
+                            let price = rows[0].price
+                            resolve(price)
+                        }
+                    })
+                })
+            }
         }
     } catch(err) {
         console.error(err)
