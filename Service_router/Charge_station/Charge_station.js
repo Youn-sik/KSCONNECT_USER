@@ -221,6 +221,7 @@ router.post("/list", (request, response)=> {
         let charge_way = request.body.charge_way == undefined ? false : request.body.charge_way
         let company = request.body.company == undefined ? false : request.body.company
         let charge_way_arr = []
+        let company_arr = []
 
         if(charge_way != false) {
             if(charge_way.includes("|")) { //여러개 일 때
@@ -241,6 +242,26 @@ router.post("/list", (request, response)=> {
         }
         // console.log(charge_way_arr)
 
+        if(company != false) {
+            if(company.includes("|")) { //여러개 일 때
+                company_arr = company.split("|")
+            } else { //한개일 때
+                company_arr.push(company)
+            }
+        } else { //0개일 때
+            company_arr.push(false)
+        }
+        // console.log(company_arr)
+
+        c_name_count = company_arr.length
+        c_name_where_question = ""
+        for (let i=0; i<c_name_count; i++) {
+            if(c_name_count - 1 == i) c_name_where_question += "?"
+            else c_name_where_question += "?,"
+        }
+        c_name_where_query = `c.name in (${c_name_where_question})`
+        // console.log(c_name_where_query)
+
         mysqlConn.connectionService.query("select " +
         // "cd.device_id ,cd.name as cd_name, sirial, charge_type, charge_way, cd.available as cd_available, cd.status as cd_status, cd.last_state as cd_last_state, device_number, purpose, " +
         "cs.station_id, cs.name as cs_name, cs.status as cs_status, cs.last_state as cs_last_state, address, cs.available as cs_available, park_fee, pay_type, lat, longi, purpose, " +
@@ -248,14 +269,14 @@ router.post("/list", (request, response)=> {
         "from charge_device as cd " +
         "inner join charge_station as cs on cs.station_id = cd.station_id " +
         "inner join company as c on cs.company_id = c.company_id " +
-        "where cd.status = ? and cd.charge_way in (?, ?, ?) and c.name = ? " +
+        "where cd.status = ? and cd.charge_way in (?, ?, ?) and " + c_name_where_query + " " +
         "group by cd.station_id"
-        , [status, ...charge_way_arr, company], async(err, rows)=> { 
+        , [status, ...charge_way_arr, ...company_arr], async(err, rows)=> { 
             if(err) {
                 console.error(err)
                 response.status(400).send({result: false, errStr: "충전소 목록을 가져오는중 문제가 발생하였습니다.", charge_stations: []})
             } else {
-                // console.log(rows)
+                console.log(rows)
                 let station_arr = []
                 for (const element of rows) {
                     let price = await get_charge_price(element.purpose)
