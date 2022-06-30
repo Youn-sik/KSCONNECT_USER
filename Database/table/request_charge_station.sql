@@ -21,6 +21,7 @@ DROP TABLE IF EXISTS `request_charge_station`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `request_charge_station` (
   `request_id` int(10) NOT NULL AUTO_INCREMENT,
+  `station_id` int(10) default NULL,
   `request_uid` int(10) NOT NULL,
   `company_id` int(10) NOT NULL,
   `name` varchar(20) NOT NULL,
