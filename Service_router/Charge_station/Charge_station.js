@@ -23,9 +23,11 @@ async function get_holiday(now_time_arr) {
         } else {
             let items = result.body.items.item
             let holidays = []
-            items.forEach(element=> {
-                holidays.push(element.locdate)
-            })
+            if (items != undefined) {
+                items.forEach(element=> {
+                    holidays.push(element.locdate)
+                })
+            }
             return holidays
         }
     })
@@ -63,11 +65,13 @@ async function get_charge_price(public) {
 
             let holiday = 'N'
             // 공휴일 date + 일 및 겹치는 날짜는 제거해서 forEach 문 돌리기
-            date.forEach(element=>  {
-                if((element == compare_date) || yoil == 0) {
-                    holiday = 'Y'
-                }
-            })
+            if (date.length != 0) {
+                date.forEach(element=>  {
+                    if((element == compare_date) || yoil == 0) {
+                        holiday = 'Y'
+                    }
+                })
+            }
 
             // 가격 조건 구하기
             if(holiday == 'Y') { // 공휴일 및 일요일
