@@ -11,6 +11,7 @@ const test_client_key = "test_ck_Lex6BJGQOVDZ0462YXq8W4w2zNbg"
 const test_secret_key = "test_sk_GKNbdOvk5rknlq6YqkzVn07xlzmj"
 const encoded_test_secret_key = Buffer.from(test_secret_key, "utf8").toString('base64');
 
+const axios = require("axios")
 const http = require("https");
 
 router.post("/billingkey", (request, response)=> {
@@ -137,7 +138,13 @@ router.post("/pay", (request, response)=> {
             if(result.code != undefined) {
                 response.send({code:result.code, message: result.message})
             } else {
-                response.send({orderId: result.orderId, method: result.method, totalAmount: result.totalAmount, card: result.card})
+                axios.post("http://localhost:4000/fcm/push", {title: "결제가 완료되었습니다."}).then((resp)=> {
+                    if(resp.data.result != "true") {
+                        response.status(400).send({result: false, errStr:"알림 전송을 실패하였습니다."})
+                    } else {
+                        response.send({orderId: result.orderId, method: result.method, totalAmount: result.totalAmount, card: result.card})
+                    }
+                })
             }
         });
     });
@@ -150,7 +157,6 @@ router.post("/pay", (request, response)=> {
     }));
 
     req.end();
-
 })
 
 

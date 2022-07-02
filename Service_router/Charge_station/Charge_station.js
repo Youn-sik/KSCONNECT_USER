@@ -108,7 +108,7 @@ async function get_charge_price(public) {
                 }
 
                 // 토요일(최대 부하만 중간 부하로 적용)
-                if(yoil == 6 && power == L) {
+                if(yoil == 6 && power == 'L') {
                     power = 'M'
                 }
             } 
@@ -514,20 +514,32 @@ router.put("/modify", (request, response)=> {
 
 router.get("/charge_point/list", (request, response)=> {
     mysqlConn.connectionService.query("select station_id from charge_station", (err, rows)=> {
-                if(err) {
-                    console.error(err)
-                    response.status(400).send({result: false, errStr: "충전소 정보를 가져오는중 문제가 발생하였습니다.", charge_stations: []})
-                } else {
-                    let charge_stations = []
-                    rows.forEach((element, _)=> {
-                        let charge_station_obj = {
-                            station_id: element.station_id,
-                        }
-                        charge_stations.push(charge_station_obj)
-                    })
-                    response.send({charge_stations: charge_stations})
+        if(err) {
+            console.error(err)
+            response.status(400).send({result: false, errStr: "충전소 정보를 가져오는중 문제가 발생하였습니다.", charge_stations: []})
+        } else {
+            let charge_stations = []
+            rows.forEach((element, _)=> {
+                let charge_station_obj = {
+                    station_id: element.station_id,
                 }
+                charge_stations.push(charge_station_obj)
             })
+            response.send({charge_stations: charge_stations})
+        }
+    })
+})
+
+router.post("/charge_price", async (request, response)=> {
+    mysqlConn.connectionService.query("select purpose from charge_station where station_id = ?", request.body.station_id, async (err, rows)=> {
+        if(err) {
+            console.error(err)
+            response.status(400).send({result: false, errStr: "충전소 정보를 가져오는중 문제가 발생하였습니다.", charge_price: parseFloat(0)})
+        } else {
+            let price = await get_charge_price(rows[0].purpose)
+            response.send({result: true, errStr: "", charge_price: parseFloat(price)})
+        }
+    })
 })
 
 module.exports = router
