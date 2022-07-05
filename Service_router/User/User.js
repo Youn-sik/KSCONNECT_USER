@@ -504,10 +504,10 @@ router.post("/membership_card_request_submit", (request, response)=> {
     }
 })
 
-router.post("/alert_list", (request, response)=> {
+router.get("/alert_list", (request, response)=> {
     try{
-        let uid = request.body.uid
-        axios.post("http://"+kepco_info.admin_service_host + ":" + kepco_info.admin_service_port + "/NAuth/alert_list", {uid: uid})
+        let uid = request.decoded.uid
+        axios.post("http://"+kepco_info.admin_service_host + ":" + kepco_info.admin_service_port + "/NAuth/alert_list", {uid: uid.toString()})
         .then((res)=> {
             // console.log(res.data)
             response.status(400).send({result: true, errStr:"", alert_list: res.data.alert_list})
