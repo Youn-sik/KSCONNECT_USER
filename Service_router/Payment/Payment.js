@@ -133,7 +133,6 @@ router.post("/pay", (request, response)=> {
             
             const body = Buffer.concat(chunks);
             let result = JSON.parse(body)
-            // console.log(result);
 
             if(result.code != undefined) {
                 response.send({code:result.code, message: result.message})

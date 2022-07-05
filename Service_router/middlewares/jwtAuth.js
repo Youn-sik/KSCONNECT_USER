@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken')
 
 function jwtAuth(request, response, next) {
-    const nonAuthPath = ["/", "/user/login", "/user/signup", "/user/info/check", "/fcm/push", "/payment/billingkey", "/payment/pay", "/charge_station/charge_price"]
+    const nonAuthPath = ["/", "/user/login", "/user/signup", "/user/info/check", "/fcm/push", "/payment/billingkey", "/payment/pay", "/charge_station/charge_price", "/user/membership_card_request_submit", "/user/auth"]
     if(nonAuthPath.includes(request.path)) {
         return next()
     } 

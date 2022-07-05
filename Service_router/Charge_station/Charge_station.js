@@ -531,11 +531,13 @@ router.get("/charge_point/list", (request, response)=> {
 })
 
 router.post("/charge_price", async (request, response)=> {
+    console.log(request.body)
     mysqlConn.connectionService.query("select purpose from charge_station where station_id = ?", request.body.station_id, async (err, rows)=> {
         if(err) {
             console.error(err)
             response.status(400).send({result: false, errStr: "충전소 정보를 가져오는중 문제가 발생하였습니다.", charge_price: parseFloat(0)})
         } else {
+            console.log(rows[0])
             let price = await get_charge_price(rows[0].purpose)
             response.send({result: true, errStr: "", charge_price: parseFloat(price)})
         }

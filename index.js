@@ -129,7 +129,7 @@ app.use("/notice_board", Service_Notice_Board)
 app.use("/FAQ_board", Service_FAQ_Board)
 app.use("/inquiry_board", Service_Inquiry_Board)
 app.use("/payment", Payment)
-app.use("/fcm", Fcm_Push)
+app.use("/fcm", Fcm_Push)    
 
 app.listen("4000", ()=> {
     console.log("[SERVER] > Backend application is listening on port: "+ 4000)

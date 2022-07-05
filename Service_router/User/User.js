@@ -23,7 +23,9 @@ router.post("/login", (request, response)=> {
                 console.error(err)
                 response.status(400).send({result: false, errStr: "로그인 중 데이터베이스 에러가 발생하였습니다.", user_info: {}, token: ""})
             } else {
-                if(password === rows[0].password) {
+                if(rows.length == 0) {
+                    response.status(400).send({result: false, errStr: "존재하지 않는 계정입니다."})
+                }else if(password === rows[0].password) {
                     const uid = rows[0].uid
                     const token = jwt.sign({
                         uid
@@ -442,6 +444,62 @@ router.post("/info/check", (request, response)=> {
         })
     } else {
         response.send({result: false, errStr: "올바르지 않은 형식입니다."})
+    }
+})
+
+router.get("/auth", (request, response)=> {
+    const token = request.headers.authorization
+
+    if(!token) {
+        return response.status(400).send({result: false, errStr: "토큰이 존재하지 않습니다."})
+    } else if(token == undefined) {
+        return response.status(400).send({result: false, errStr: "토큰이 존재하지 않습니다."})
+    } else {
+        const vertify = new Promise(
+            (resolve, reject) => {
+                console.log(token)
+                jwt.verify(token, "cho", (err, decoded) => {
+                    if(err) reject(err)
+                    resolve(decoded)
+                })
+            }
+        )
+    
+        const onError = (err) => {
+            console.log(err)
+            if(err.name == "TokenExpireError") {
+                response.status(400).send({result: false, errStr:"토큰이 만료되었습니다."})
+            } else {
+                response.status(400).send({result: false, errStr:"유효하지 않은 토큰입니다."})
+            }
+        }
+    
+        vertify.then((decoded)=>{
+            request.decoded = decoded
+            return response.status(200).send({result: true, errStr: ""})
+        }).catch(onError)
+    }
+})
+
+router.post("/membership_card_request_submit", (request, response)=> {
+    try{
+        console.log(request.body)
+        if(!request.body) {
+            response.status(400).send({"result":"false", "errStr": "필수 파라메터가 누락되었습니다."})
+        } else {
+            if(request.body.reqData.request_value == "permitted") {
+                mysqlConn.connectionService.query("update user set membership_card_number = ? where uid = ?", [request.body.membershipCardNumber, request.body.reqData.request_uid], (err, rows)=> {
+                    if(err) {
+                        response.status(400).send({"result":"false", "errStr": "DB 쿼리중 문제가 발생하였습니다."})
+                    }
+                })
+            } else {
+                // 거부 당한 메시지
+            }
+            response.status(200).send({"result":"true", "errStr":""})
+        }
+    } catch(err){
+        console.error(err)
     }
 })
 
