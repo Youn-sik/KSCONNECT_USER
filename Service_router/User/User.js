@@ -510,7 +510,7 @@ router.get("/alert_list", (request, response)=> {
         axios.post("http://"+kepco_info.admin_service_host + ":" + kepco_info.admin_service_port + "/NAuth/alert_list", {uid: uid.toString()})
         .then((res)=> {
             // console.log(res.data)
-            response.status(400).send({result: true, errStr:"", alert_list: res.data.alert_list})
+            response.status(200).send({result: true, errStr:"", alert_list: res.data.alert_list})
         })
     } catch(err) {
         console.error(err)
