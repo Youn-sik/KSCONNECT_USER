@@ -4,6 +4,7 @@ const mysqlConn = require("../../database_conn")
 const jwt = require("jsonwebtoken")
 
 const kepco_info = require("../../RomingInfo.json")
+const { default: axios } = require("axios")
 const MongoClient = require("mongodb").MongoClient
 let MongoDB
 MongoClient.connect(kepco_info.mongodb_host + ":" + kepco_info.mongodb_port + "/ocppdb", (err, client1)=> {
@@ -483,7 +484,6 @@ router.get("/auth", (request, response)=> {
 
 router.post("/membership_card_request_submit", (request, response)=> {
     try{
-        console.log(request.body)
         if(!request.body) {
             response.status(400).send({"result":"false", "errStr": "필수 파라메터가 누락되었습니다."})
         } else {
@@ -500,6 +500,21 @@ router.post("/membership_card_request_submit", (request, response)=> {
         }
     } catch(err){
         console.error(err)
+        response.status(400).send({result: false, errStr:"잘못된 형식 입니다."})
+    }
+})
+
+router.post("/alert_list", (request, response)=> {
+    try{
+        let uid = request.body.uid
+        axios.post("http://"+kepco_info.admin_service_host + ":" + kepco_info.admin_service_port + "/NAuth/alert_list", {uid: uid})
+        .then((res)=> {
+            // console.log(res.data)
+            response.status(400).send({result: true, errStr:"", alert_list: res.data.alert_list})
+        })
+    } catch(err) {
+        console.error(err)
+        response.status(400).send({result: false, errStr:"잘못된 형식 입니다."})
     }
 })
 
