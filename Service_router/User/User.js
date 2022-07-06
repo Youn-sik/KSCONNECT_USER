@@ -526,18 +526,19 @@ router.post("/membership_card_request_submit", (request, response)=> {
                     request_reason: request.body.reqData.request_reason,
                     address: request.body.reqData.Request_address
                 }
-                mysqlConn.connectionService.query("update user set membership_card_number = ? where uid = ?", [request.body.membershipCardNumber, request.body.reqData.request_uid], (err, rows)=> {
+
+                mysqlConn.connectionService.query("insert into user_membership_card set ?", obj, (err, rows)=> {
                     if(err) {
                         console.error(err)
                         response.status(400).send({"result":"false", "errStr": "DB 쿼리중 문제가 발생하였습니다."})
                         return
-                    }
-                    mysqlConn.connectionService.query("insert into user_membership_card set ?", obj, (err, rows)=> {
+                    } 
+                    mysqlConn.connectionService.query("update user set membership_card_number = ? where uid = ?", [request.body.membershipCardNumber, request.body.reqData.request_uid], (err, rows)=> {
                         if(err) {
                             console.error(err)
                             response.status(400).send({"result":"false", "errStr": "DB 쿼리중 문제가 발생하였습니다."})
                             return
-                        } 
+                        }
                         response.status(200).send({"result":"true", "errStr":""})
                     })
                 })
