@@ -5,12 +5,13 @@ const jwt = require("jsonwebtoken")
 
 const kepco_info = require("../../RomingInfo.json")
 const { default: axios } = require("axios")
+const { connectionRoming } = require("../../database_conn")
 const MongoClient = require("mongodb").MongoClient
 let MongoDB
 MongoClient.connect(kepco_info.mongodb_host + ":" + kepco_info.mongodb_port + "/ocppdb", (err, client1)=> {
     if(err) return console.error(err)
     console.log("[MONGODB] > 'ocppdb' Database Connected")
-    MongoDB = client1.db("ocppdb")
+    MongoDB = client1.db("Admin_Service")
 })
 
 router.post("/login", (request, response)=> {
@@ -315,75 +316,101 @@ router.get("/charge_record", (request, response)=> {
 
 router.get("/charge_status", (request, response)=> {
     try {
-        mysqlConn.connectionService.query("select * from user where uid = ?", request.decoded.uid, (err, rows)=> {
+        // console.log(request.decoded.uid)
+        let uid = request.decoded.uid
+        mysqlConn.connectionService.query("select * from user where uid = ?", uid, (err, rows)=> {
             if(err) {
                 console.error(err)
-                response.status(400).send({result: false, errStr: "충전 상태 조회중 문제가 발생하였습니다.", charge_records: []})
+                response.status(400).send({result: false, errStr: "사용자 조회중 문제가 발생하였습니다.", charge_records: []})
             } else {
                 // console.log(rows[0])
                 let rfid = rows[0].rfid
                 let pay_type = rows[0].pay_type
-                
-                new Promise((resolve, reject)=> {
-                    MongoDB.collection("transactions").find({"idTag" : rfid.toString(), "status": "Active"}).toArray(async (err, result)=> {  
-                        if(err) {
-                            console.error(err) 
-                            response.status(400).send({result: false, errStr: "트랜젝션 검색중 문제가 발생하였습니다."})
-                            reject()
-                        }
-                        if(result.length == 0) {
-                            response.status(400).send({result:false, errStr: "현재 충전중이 아닙니다."})
-                            reject()
-                        }
-                        resolve(result[0])
-                    })
-                }).then((mongo_obj)=> {
-                    // console.log(mongo_obj) 
+
+                // 충전 상태 확인
+                let uidStr = uid.toString()
+                axios.post("http://" + kepco_info.admin_service_host + ":" + kepco_info.admin_service_port + "/NAuth/check_charge_status", {uid: uidStr}).then((res)=> {
+                    if(res.data.result == "false") {
+                        response.status(400).send({result:false, errStr: "현재 충전중이 아닙니다."})
+                        return
+                    }
+                    
+                    let transaction = res.data.transaction
+                    let station_id = transaction.Transaction.chargepointid
+                    let device_id = transaction.Transaction.payload.connectorid
+                    let startTimestamp = transaction.StartTimestamp
+                    let transaction_id = transaction.Transaction.transactionid
+                    // console.log(transaction)
+                    
                     Promise.all([
                         new Promise((resolve, reject)=> {
-                            mysqlConn.connectionService.query("select * from charge_station where station_id = ?", mongo_obj.chargePointId, (err, rows)=> {
-                                if(err) {
-                                    console.error(err) 
-                                    response.status(400).send({result: false, errStr: "충전소 검색중 문제가 발생하였습니다."})
+                            // 충전소 정보 확인
+                            mysqlConn.connectionService.query("select * from charge_station where station_id = ?", station_id, (err, rows)=> {
+                                if (err) {
+                                    console.error(err)
+                                    response.status(400).send({result: false, errStr: "충전소 조회중 문제가 발생하였습니다."})
                                     reject()
                                 }
-                                else {
-                                    resolve(rows[0])
-                                }
+                                let charge_station_info = rows[0]
+                                
+                                resolve(charge_station_info)
                             })
-                        }),
+                        }), 
+                        
                         new Promise((resolve, reject)=> {
-                            MongoDB.collection("meters").find({"chargePointId" : mongo_obj.chargePointId, "connectorId": mongo_obj.connectorId}).sort({$natural: -1}).limit(1).toArray(async (err, result)=> {  
-                                if(err) {
-                                    console.error(err) 
-                                    response.status(400).send({result: false, errStr: "트랜젝션 검색중 문제가 발생하였습니다."})
+                            // 메타 벨류 값 확인
+                            axios.post("http://" + kepco_info.admin_service_host + ":" + kepco_info.admin_service_port + "/NAuth/get_meter_value", {tid: transaction_id}).then((res)=> {
+                                if(res.data.result == "false") {
+                                    response.status(400).send({result:false, errStr: "Meter Value 값 조회중 문제가 발생하였습니다."})
                                     reject()
                                 }
-                                else if(result.length == 0) {
-                                    response.status(204).send({result:false, errStr: "현재 충전중이 아닙니다."})
-                                    reject()
-                                } else {
-                                    // console.log(result[0].meterValue[0]) // 0은 안씀
-                                    // console.log(result[0].meterValue[1]) // 1을 씀
-                                    let meterValue = result[0].meterValue[1].sampled_value[0]
-                                    // console.log(meterValue)
-                                    resolve(meterValue)
-                                }
+
+                                let totMeterValue = res.data.metervalue
+                                let meterValue = totMeterValue.MeterValues.payload.metervalue[0].sampledvalue[1].value
+                                // console.log(totMeterValue)
+                                // console.log(meterValue)
+
+                                // 사용 금액 확인 **가격이 넘어가는 시간에는 어떻게 ? - 수정 필요
+                                // 수정 필요
+                                axios.post("http://localhost:4000/charge_station/charge_price", {station_id: station_id}).then((res)=> {
+                                    if(res.data.result != true){
+                                        response.status(400).send({result:false, errStr: "Charge price 값 조회중 문제가 발생하였습니다."})
+                                        reject()
+                                    }
+
+                                    let charge_price = res.data.charge_price
+                                    let totPayment = charge_price * meterValue
+                                    let send_data = {
+                                        meterValue: meterValue,
+                                        payment: totPayment,
+                                        startTime: startTimestamp
+                                    }
+                                    resolve(send_data)
+                                })
+
+                            }).catch((err)=> {
+                                console.error(err)
+                                response.status(400).send({result:false, errStr: "Admin Service API 사용중 문제가 발생하였습니다."})
+                                reject()
                             })
-                        }) 
-                    ]).then((val)=> {
+                        })
+                    ]).then(result => { 
                         let send_data = {
-                            charge_station_name: val[0].name,
-                            charge_kwh: (val[1].value - mongo_obj.meterStart),
-                            startTime: mongo_obj.startTime,
-                            charge_amount: (val[1].value * 292.1),
-                            payment_way: "신용카드"
+                            charge_station_name: result[0].name,
+                            payment_way: result[0].pay_type,
+                            charge_kwh: result[1].meterValue,
+                            startTime: result[1].startTime,
+                            charge_amount: result[1].payment
                         }
                         // console.log(send_data)
                         response.send({result: true, errStr: "", value: send_data})
-                    })
-
-                }).catch((err)=> {
+                    }).catch(()=> {
+                        return
+                    });
+                    
+                }).catch(err => {
+                    console.error(err)
+                    response.status(400).send({result:false, errStr: "Admin Service API 사용중 문제가 발생하였습니다."})
                 })
             }
         })

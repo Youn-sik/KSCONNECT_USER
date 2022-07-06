@@ -17,7 +17,7 @@
     "mqtt_password": "master",
     "nats_host": "172.16.3.89",
     "nats_port": "4222",
-    "mongodb_host": "mongodb://172.16.3.89",
+    "mongodb_host": "mongodb://172.16.38.157",
     "mongodb_port": "27017",
     "admin_service_host":"172.16.38.157",
     "admin_service_port":"4001"

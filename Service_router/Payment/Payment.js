@@ -137,6 +137,7 @@ router.post("/pay", (request, response)=> {
             if(result.code != undefined) {
                 response.send({code:result.code, message: result.message})
             } else {
+                // 수정 필요
                 axios.post("http://localhost:4000/fcm/push", {title: "결제가 완료되었습니다."}).then((resp)=> {
                     if(resp.data.result != "true") {
                         response.status(400).send({result: false, errStr:"알림 전송을 실패하였습니다."})
