@@ -511,19 +511,39 @@ router.get("/auth", (request, response)=> {
 
 router.post("/membership_card_request_submit", (request, response)=> {
     try{
+        // console.log(request.body)
         if(!request.body) {
             response.status(400).send({"result":"false", "errStr": "필수 파라메터가 누락되었습니다."})
+            return
         } else {
             if(request.body.reqData.request_value == "permitted") {
+                let obj = {
+                    request_uid: request.body.reqData.request_uid,
+                    membership_card_number: request.body.membershipCardNumber,
+                    request_way: request.body.reqData.request_way,
+                    request_status: "발급",
+                    request_time: request.body.timestamp,
+                    request_reason: request.body.reqData.request_reason,
+                    address: request.body.reqData.Request_address
+                }
                 mysqlConn.connectionService.query("update user set membership_card_number = ? where uid = ?", [request.body.membershipCardNumber, request.body.reqData.request_uid], (err, rows)=> {
                     if(err) {
+                        console.error(err)
                         response.status(400).send({"result":"false", "errStr": "DB 쿼리중 문제가 발생하였습니다."})
+                        return
                     }
+                    mysqlConn.connectionService.query("insert into user_membership_card set ?", obj, (err, rows)=> {
+                        if(err) {
+                            console.error(err)
+                            response.status(400).send({"result":"false", "errStr": "DB 쿼리중 문제가 발생하였습니다."})
+                            return
+                        } 
+                        response.status(200).send({"result":"true", "errStr":""})
+                    })
                 })
             } else {
                 // 거부 당한 메시지
             }
-            response.status(200).send({"result":"true", "errStr":""})
         }
     } catch(err){
         console.error(err)

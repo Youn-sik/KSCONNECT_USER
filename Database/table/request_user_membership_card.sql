@@ -15,6 +15,9 @@
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
+--
+-- Table structure for table `request_user_membership_card`
+--
 
 DROP TABLE IF EXISTS `request_user_membership_card`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -25,9 +28,23 @@ CREATE TABLE `request_user_membership_card` (
   `request_time` datetime NOT NULL,
   `request_way` varchar(50) NOT NULL,
   `request_reason` varchar(50) NOT NULL,
-  PRIMARY KEY (`request_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+  `request_address` varchar(255) NOT NULL,
+  PRIMARY KEY (`request_id`),
+  UNIQUE constraint_UK (`request_uid`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `request_user_membership_card`
+--
+
+LOCK TABLES `request_user_membership_card` WRITE;
+/*!40000 ALTER TABLE `request_user_membership_card` DISABLE KEYS */;
+/*!40000 ALTER TABLE `request_user_membership_card` ENABLE KEYS */;
+UNLOCK TABLES;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
 /*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
@@ -35,4 +52,4 @@ CREATE TABLE `request_user_membership_card` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-06-22 16:52:03
+-- Dump completed on 2022-07-06 13:50:24
