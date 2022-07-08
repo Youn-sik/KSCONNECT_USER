@@ -33,117 +33,6 @@ async function get_holiday(now_time_arr) {
     })
 }
 
-async function get_charge_price(public) {
-// const get_charge_price = async(public)=> {
-    try{
-        if(public == 'public') { // 공용
-            return new Promise((resolve, reject)=> {
-                mysqlConn.connectionService.query("select * from charge_price where public = 'Y' and kw100 = 'N'", (err, rows)=> {
-                    if(err) {
-                        console.error(err)
-                        resolve(null)
-                    } else {
-                        let price = rows[0].price
-                        resolve(price)
-                    }
-                })
-            })
-        } else { // 비공용
-            let now_time = moment().format('YYYY-MM-DD-HH-mm-ss') 
-
-            // yoil = 0, 6 이 일요일 및 토요일 이다.
-            let yoil = moment().format('e')
-            let now_time_arr = now_time.split('-')
-            let season
-            let power
-
-            // 공휴일 GET
-            let date = await get_holiday(now_time_arr)
-
-            // 비교 할 오늘 날짜
-            let compare_date = now_time_arr[0] + now_time_arr[1] + now_time_arr[2]
-
-            let holiday = 'N'
-            // 공휴일 date + 일 및 겹치는 날짜는 제거해서 forEach 문 돌리기
-            if (date.length != 0) {
-                date.forEach(element=>  {
-                    if((element == compare_date) || yoil == 0) {
-                        holiday = 'Y'
-                    }
-                })
-            }
-
-            // 가격 조건 구하기
-            if(holiday == 'Y') { // 공휴일 및 일요일
-                power = 'S'
-            } else {
-                // 평일 또는 토요일
-                if(now_time_arr[1] >= 6 && now_time_arr[1] <= 8) { // 여름 (season = S)
-                    if(now_time_arr[3] == 9 || now_time_arr[3] == 12 || (now_time_arr[3] >= 17 && now_time_arr[3] < 23)) { // 중간 부하
-                        power = 'M'
-                    } else if((now_time_arr[3] >= 10 && now_time_arr[3] < 12) || (now_time_arr[3] >= 13 && now_time_arr[3] < 17)) { // 최대 부하
-                        power = 'L'
-                    } else { // 경 부하
-                        power = 'S'
-                    }
-                    season = 'S'
-                } else if((now_time_arr[1] >= 3 && now_time_arr[1] <= 5) || (now_time_arr[1] >= 9 && now_time_arr[1] <= 10)) { // 봄,가을 (season = E)
-                    if(now_time_arr[3] == 9 || now_time_arr[3] == 12 || (now_time_arr[3] >= 17 && now_time_arr[3] < 23)) { // 중간 부하
-                        power = 'M'
-                    } else if((now_time_arr[3] >= 10 && now_time_arr[3] < 12) || (now_time_arr[3] >= 13 && now_time_arr[3] < 17)) { // 최대 부하
-                        power = 'L'
-                    } else { // 경 부하
-                        power = 'S'
-                    }
-                    season = 'E'
-                } else { //겨울 (season = W)
-                    if(now_time_arr[3] == 9 || (now_time_arr[3] >= 12 && now_time_arr[3] < 17) || (now_time_arr[3] >= 20 && now_time_arr[3] < 22)) { // 중간 부하
-                        power = 'M'
-                    } else if((now_time_arr[3] >= 10 && now_time_arr[3] < 12) || (now_time_arr[3] >= 17 && now_time_arr[3] < 20) || now_time_arr[3] == 22) { // 최대 부하
-                        power = 'L'
-                    } else { // 경 부하
-                        power = 'S'
-                    }
-                    season = 'W'
-                }
-
-                // 토요일(최대 부하만 중간 부하로 적용)
-                if(yoil == 6 && power == 'L') {
-                    power = 'M'
-                }
-            } 
-
-            if(power == 'L') {
-                return new Promise((resolve, reject)=> {
-                    mysqlConn.connectionService.query("select * from charge_price where public = 'N' and kw100 = 'N' and season = ? and power = ? ", [season, power], (err, rows)=> {
-                        if(err) {
-                            console.error(err)
-                            resolve(null)
-                        } else {
-                            let price = rows[0].price
-                            resolve(price)
-                        }
-                    })
-                })
-            } else {
-                return new Promise((resolve, reject)=> {
-                    mysqlConn.connectionService.query("select * from charge_price where public = 'N' and season = ? and power = ? ", [season, power], (err, rows)=> {
-                        if(err) {
-                            console.error(err)
-                            resolve(null)
-                        } else {
-                            let price = rows[0].price
-                            resolve(price)
-                        }
-                    })
-                })
-            }
-        }
-    } catch(err) {
-        console.error(err)
-    }
-}
-
 router.get("/list", async(request, response)=> {
     try {
         let search = request.query.search
@@ -530,16 +419,308 @@ router.get("/charge_point/list", (request, response)=> {
     })
 })
 
+
 router.post("/charge_price", async (request, response)=> {
+    // console.log(request.body)
     mysqlConn.connectionService.query("select purpose from charge_station where station_id = ?", request.body.station_id, async (err, rows)=> {
         if(err) {
             console.error(err)
             response.status(400).send({result: false, errStr: "충전소 정보를 가져오는중 문제가 발생하였습니다.", charge_price: parseFloat(0)})
         } else {
-            let price = await get_charge_price(rows[0].purpose)
-            response.send({result: true, errStr: "", charge_price: parseFloat(price)})
+            // console.log(request.body.meterValues)
+            // console.log(request.body.totMeterValue)
+
+            let public = rows[0].purpose
+            let meterValues = request.body.meterValues
+            let totMeterValue = request.body.totMeterValue
+            let calc_mv = []
+            for(let i=0; i<meterValues.length; i++) {
+                let tmp = {
+                    timestamp: ((meterValues[i].Timestamp).replace(/T/g, '-')).replace(/:/g, '-'),
+                    meterValue: parseFloat(meterValues[i].MeterValues.payload.metervalue[0].sampledvalue[1].value)
+                }
+                calc_mv.push(tmp)
+            }
+            calc_mv.push({
+                timestamp: (totMeterValue.timestamp.replace(/T/g, '-')).replace(/:/g, '-'),
+                meterValue: parseFloat(totMeterValue.totMeterValue)
+            })
+
+            // let price = await get_payment_charge_price(rows[0].purpose, calc_mv)
+            let now_price
+            let now_mv = 0.0
+            let tot_price = 0.0
+            
+            // console.log(calc_mv.length)
+            for(let i=0; i<calc_mv.length; i++) {
+                let tm_price = await get_payment_charge_price(rows[0].purpose, calc_mv[i])
+                let tmp_price = parseFloat(tm_price) 
+                // console.log(calc_mv[i].timestamp)
+                // console.log(tmp_price)
+                if (i == 0) now_price = tmp_price
+                if (now_price != tmp_price) {
+                    console.log("***")
+                    tot_price += now_price * (calc_mv[i-1].meterValue - now_mv)
+                    now_mv = calc_mv[i-1].meterValue
+                }
+                if (i == calc_mv.length - 1) {
+                    console.log("******")
+                    tot_price += tmp_price * calc_mv[i].meterValue
+                }
+                now_price = tmp_price
+            }
+            console.log(tot_price)
+
+            let price = tot_price
+            response.send({result: true, errStr: "", charge_price: price})
         }
     })
 })
+
+
+async function get_payment_charge_price(public, calc_mv) {
+    // console.log(public)
+    // console.log(calc_mv)
+    try{
+        let price
+        let price_list = globalThis.G_chargePrice
+        let kw100
+        if (calc_mv.meterValue < 100) kw100 = 'N'
+        else kw100 = 'Y'
+
+        if(public == 'public') { // 공용
+            for(let i=0; i<price_list.length; i++) {
+                if(price_list[i].public == 'Y' && price_list[i].kw100 == kw100) price = price_list[i].price
+            }
+            return price
+
+            // return new Promise((resolve, reject)=> {
+            //     mysqlConn.connectionService.query("select * from charge_price where public = 'Y' and kw100 = ?", kw100, (err, rows)=> {
+            //         if(err) {
+            //             console.error(err)
+            //             resolve(null)
+            //         } else {
+            //             let price = rows[0].price
+            //             resolve(price)
+            //         }
+            //     })
+            // })
+        } else { // 비공용
+            // let now_time = moment().format('YYYY-MM-DD-HH-mm-ss') 
+            let now_time = calc_mv.timestamp
+
+            // yoil = 0, 6 이 일요일 및 토요일 이다.
+            let yoil = moment().format('e')
+            let now_time_arr = now_time.split('-')
+            let season
+            let power
+
+            // 공휴일 GET
+            let date = await get_holiday(now_time_arr)
+
+            // 비교 할 오늘 날짜
+            let compare_date = now_time_arr[0] + now_time_arr[1] + now_time_arr[2]
+
+            let holiday = 'N'
+            // 공휴일 date + 일 및 겹치는 날짜는 제거해서 forEach 문 돌리기
+            if (date.length != 0) {
+                date.forEach(element=>  {
+                    if((element == compare_date) || yoil == 0) {
+                        holiday = 'Y'
+                    }
+                })
+            }
+
+            // 가격 조건 구하기
+            if(holiday == 'Y') { // 공휴일 및 일요일
+                power = 'S'
+            } else {
+                // 평일 또는 토요일
+                if(now_time_arr[1] >= 6 && now_time_arr[1] <= 8) { // 여름 (season = S)
+                    if(now_time_arr[3] == 9 || now_time_arr[3] == 12 || (now_time_arr[3] >= 17 && now_time_arr[3] < 23)) { // 중간 부하
+                        power = 'M'
+                    } else if((now_time_arr[3] >= 10 && now_time_arr[3] < 12) || (now_time_arr[3] >= 13 && now_time_arr[3] < 17)) { // 최대 부하
+                        power = 'L'
+                    } else { // 경 부하
+                        power = 'S'
+                    }
+                    season = 'S'
+                } else if((now_time_arr[1] >= 3 && now_time_arr[1] <= 5) || (now_time_arr[1] >= 9 && now_time_arr[1] <= 10)) { // 봄,가을 (season = E)
+                    if(now_time_arr[3] == 9 || now_time_arr[3] == 12 || (now_time_arr[3] >= 17 && now_time_arr[3] < 23)) { // 중간 부하
+                        power = 'M'
+                    } else if((now_time_arr[3] >= 10 && now_time_arr[3] < 12) || (now_time_arr[3] >= 13 && now_time_arr[3] < 17)) { // 최대 부하
+                        power = 'L'
+                    } else { // 경 부하
+                        power = 'S'
+                    }
+                    season = 'E'
+                } else { //겨울 (season = W)
+                    if(now_time_arr[3] == 9 || (now_time_arr[3] >= 12 && now_time_arr[3] < 17) || (now_time_arr[3] >= 20 && now_time_arr[3] < 22)) { // 중간 부하
+                        power = 'M'
+                    } else if((now_time_arr[3] >= 10 && now_time_arr[3] < 12) || (now_time_arr[3] >= 17 && now_time_arr[3] < 20) || now_time_arr[3] == 22) { // 최대 부하
+                        power = 'L'
+                    } else { // 경 부하
+                        power = 'S'
+                    }
+                    season = 'W'
+                }
+
+                // 토요일(최대 부하만 중간 부하로 적용)
+                if(yoil == 6 && power == 'L') {
+                    power = 'M'
+                }
+            } 
+
+            if(power == 'L') {
+                for(let i=0; i<price_list.length; i++) {
+                    if(price_list[i].public == 'N' && price_list[i].kw100 == kw100 && price_list[i].season == season && price_list[i].power == power) price = price_list[i].price
+                }
+                return price
+
+                // return new Promise((resolve, reject)=> {
+                //     mysqlConn.connectionService.query("select * from charge_price where public = 'N' and kw100 = ? and season = ? and power = ? ", [kw100, season, power], (err, rows)=> {
+                //         if(err) {
+                //             console.error(err)
+                //             resolve(null)
+                //         } else {
+                //             let price = rows[0].price
+                //             resolve(price)
+                //         }
+                //     })
+                // })
+            } else {
+                for(let i=0; i<price_list.length; i++) {
+                    if(price_list[i].public == 'N' && price_list[i].season == season && price_list[i].power == power) price = price_list[i].price
+                }
+                return price
+
+                // return new Promise((resolve, reject)=> {
+                //     mysqlConn.connectionService.query("select * from charge_price where public = 'N' and season = ? and power = ? ", [season, power], (err, rows)=> {
+                //         if(err) {
+                //             console.error(err)
+                //             resolve(null)
+                //         } else {
+                //             let price = rows[0].price
+                //             resolve(price)
+                //         }
+                //     })
+                // })
+            }
+        }
+    } catch(err) {
+        console.error(err)
+    }
+}
+
+async function get_charge_price(public) {
+    // const get_charge_price = async(public)=> {
+        try{
+            if(public == 'public') { // 공용
+                return new Promise((resolve, reject)=> {
+                    mysqlConn.connectionService.query("select * from charge_price where public = 'Y' and kw100 = 'N'", (err, rows)=> {
+                        if(err) {
+                            console.error(err)
+                            resolve(null)
+                        } else {
+                            let price = rows[0].price
+                            resolve(price)
+                        }
+                    })
+                })
+            } else { // 비공용
+                let now_time = moment().format('YYYY-MM-DD-HH-mm-ss') 
+    
+                // yoil = 0, 6 이 일요일 및 토요일 이다.
+                let yoil = moment().format('e')
+                let now_time_arr = now_time.split('-')
+                let season
+                let power
+    
+                // 공휴일 GET
+                let date = await get_holiday(now_time_arr)
+    
+                // 비교 할 오늘 날짜
+                let compare_date = now_time_arr[0] + now_time_arr[1] + now_time_arr[2]
+    
+                let holiday = 'N'
+                // 공휴일 date + 일 및 겹치는 날짜는 제거해서 forEach 문 돌리기
+                if (date.length != 0) {
+                    date.forEach(element=>  {
+                        if((element == compare_date) || yoil == 0) {
+                            holiday = 'Y'
+                        }
+                    })
+                }
+    
+                // 가격 조건 구하기
+                if(holiday == 'Y') { // 공휴일 및 일요일
+                    power = 'S'
+                } else {
+                    // 평일 또는 토요일
+                    if(now_time_arr[1] >= 6 && now_time_arr[1] <= 8) { // 여름 (season = S)
+                        if(now_time_arr[3] == 9 || now_time_arr[3] == 12 || (now_time_arr[3] >= 17 && now_time_arr[3] < 23)) { // 중간 부하
+                            power = 'M'
+                        } else if((now_time_arr[3] >= 10 && now_time_arr[3] < 12) || (now_time_arr[3] >= 13 && now_time_arr[3] < 17)) { // 최대 부하
+                            power = 'L'
+                        } else { // 경 부하
+                            power = 'S'
+                        }
+                        season = 'S'
+                    } else if((now_time_arr[1] >= 3 && now_time_arr[1] <= 5) || (now_time_arr[1] >= 9 && now_time_arr[1] <= 10)) { // 봄,가을 (season = E)
+                        if(now_time_arr[3] == 9 || now_time_arr[3] == 12 || (now_time_arr[3] >= 17 && now_time_arr[3] < 23)) { // 중간 부하
+                            power = 'M'
+                        } else if((now_time_arr[3] >= 10 && now_time_arr[3] < 12) || (now_time_arr[3] >= 13 && now_time_arr[3] < 17)) { // 최대 부하
+                            power = 'L'
+                        } else { // 경 부하
+                            power = 'S'
+                        }
+                        season = 'E'
+                    } else { //겨울 (season = W)
+                        if(now_time_arr[3] == 9 || (now_time_arr[3] >= 12 && now_time_arr[3] < 17) || (now_time_arr[3] >= 20 && now_time_arr[3] < 22)) { // 중간 부하
+                            power = 'M'
+                        } else if((now_time_arr[3] >= 10 && now_time_arr[3] < 12) || (now_time_arr[3] >= 17 && now_time_arr[3] < 20) || now_time_arr[3] == 22) { // 최대 부하
+                            power = 'L'
+                        } else { // 경 부하
+                            power = 'S'
+                        }
+                        season = 'W'
+                    }
+    
+                    // 토요일(최대 부하만 중간 부하로 적용)
+                    if(yoil == 6 && power == 'L') {
+                        power = 'M'
+                    }
+                } 
+    
+                if(power == 'L') {
+                    return new Promise((resolve, reject)=> {
+                        mysqlConn.connectionService.query("select * from charge_price where public = 'N' and kw100 = 'N' and season = ? and power = ? ", [season, power], (err, rows)=> {
+                            if(err) {
+                                console.error(err)
+                                resolve(null)
+                            } else {
+                                let price = rows[0].price
+                                resolve(price)
+                            }
+                        })
+                    })
+                } else {
+                    return new Promise((resolve, reject)=> {
+                        mysqlConn.connectionService.query("select * from charge_price where public = 'N' and season = ? and power = ? ", [season, power], (err, rows)=> {
+                            if(err) {
+                                console.error(err)
+                                resolve(null)
+                            } else {
+                                let price = rows[0].price
+                                resolve(price)
+                            }
+                        })
+                    })
+                }
+            }
+        } catch(err) {
+            console.error(err)
+        }
+    }
 
 module.exports = router

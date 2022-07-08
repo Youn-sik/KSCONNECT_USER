@@ -108,8 +108,8 @@ app.use(cookieParser())
 //         // store: new fileStore()
 //   })
 // )
-app.use(bodyParser.urlencoded({extended: false}))
-app.use(bodyParser.json())
+app.use(bodyParser.urlencoded({extended: false, limit: '50mb'}))
+app.use(bodyParser.json({limit: '50mb'}))
 app.use(jwtAuth)
 
 // app.use("/evapi/charging", Roming_Charging)
@@ -133,4 +133,12 @@ app.use("/fcm", Fcm_Push)
 
 app.listen("4000", ()=> {
     console.log("[SERVER] > Backend application is listening on port: "+ 4000)
+})
+
+mysqlConn.connectionService.query("select * from charge_price", (err, rows)=> {
+    if(err) {
+        console.error(err)
+        return
+    }
+    globalThis.G_chargePrice = rows
 })

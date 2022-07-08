@@ -363,8 +363,10 @@ router.get("/charge_status", (request, response)=> {
                                 if(res.data.result == "false") {
                                     response.status(400).send({result:false, errStr: "Meter Value 값 조회중 문제가 발생하였습니다."})
                                     reject()
+                                    return
                                 }
 
+                                console.log(res.data)
                                 let totMeterValue = res.data.metervalue
                                 let meterValue = totMeterValue.MeterValues.payload.metervalue[0].sampledvalue[1].value
                                 // console.log(totMeterValue)
@@ -376,6 +378,7 @@ router.get("/charge_status", (request, response)=> {
                                     if(res.data.result != true){
                                         response.status(400).send({result:false, errStr: "Charge price 값 조회중 문제가 발생하였습니다."})
                                         reject()
+                                        return
                                     }
 
                                     let charge_price = res.data.charge_price
@@ -392,6 +395,7 @@ router.get("/charge_status", (request, response)=> {
                                 console.error(err)
                                 response.status(400).send({result:false, errStr: "Admin Service API 사용중 문제가 발생하였습니다."})
                                 reject()
+                                return
                             })
                         })
                     ]).then(result => { 
