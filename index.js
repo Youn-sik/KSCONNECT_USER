@@ -5,6 +5,13 @@ const cookieParser = require("cookie-parser")
 // const session = require("express-session")
 // const fileStore = require("session-file-store")(session)
 const cors = require("cors")
+const schedule = require("node-schedule")
+
+const axios = require("axios")
+const moment = require('moment');
+require('moment-timezone');
+moment.tz.setDefault("Asia/Seoul");
+
 const jwtAuth = require("./Service_router/middlewares/jwtAuth")
 
 const kepco_info = require("./RomingInfo.json")
@@ -38,6 +45,12 @@ const { request } = require("https")
 //     password: kepco_info.mysql_password,
 //     databases: kepco_info.Service_Session
 // }
+
+const getHoliday = schedule.scheduleJob('0 0 0 1 */1 *', async ()=> {
+    let now_time = moment().format('YYYY-MM-DD-HH-mm-ss') 
+    let now_time_arr = now_time.split('-')
+    globalThis.holiday = await get_holiday(now_time_arr)
+})
 
 mysqlConn.connectionService.connect(err=> {
     if(err) {
@@ -135,10 +148,41 @@ app.listen("4000", ()=> {
     console.log("[SERVER] > Backend application is listening on port: "+ 4000)
 })
 
-mysqlConn.connectionService.query("select * from charge_price", (err, rows)=> {
+mysqlConn.connectionService.query("select * from charge_price", async (err, rows)=> {
     if(err) {
         console.error(err)
         return
     }
     globalThis.G_chargePrice = rows
+
+    let now_time = moment().format('YYYY-MM-DD-HH-mm-ss') 
+    let now_time_arr = now_time.split('-')
+    globalThis.holiday = await get_holiday(now_time_arr)
 })
+
+
+// 특일 정보 데이터 유효 연도(2024-06-07) 이후에는 재 신청하여 사용 필요.
+async function get_holiday(now_time_arr) {
+    let solYear = now_time_arr[0]
+    let solMonth = now_time_arr[1]
+    let ServiceKey = "jfBsg4lK63Nz%2BvKrJd%2F7GPg4cWhMRbHnuANvDhLau2jiR6iOPofuBQ8LaPSGiE5zVSwzki9tGrezxvZEac057A%3D%3D"
+    let _type = "json"
+
+    // 공휴일 데이터 GET
+    return await axios.get(`http://apis.data.go.kr/B090041/openapi/service/SpcdeInfoService/getRestDeInfo?solYear=${solYear}&solMonth=${solMonth}&_type=${_type}&ServiceKey=${ServiceKey}`)
+    .then((res)=> {
+        let result = res.data.response 
+        if(result.header.resultCode != '00') {
+            return null
+        } else {
+            let items = result.body.items.item
+            let holidays = []
+            if (items != undefined) {
+                items.forEach(element=> {
+                    holidays.push(element.locdate)
+                })
+            }
+            return holidays
+        }
+    })
+}

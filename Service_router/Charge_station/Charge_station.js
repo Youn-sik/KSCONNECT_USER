@@ -1,37 +1,12 @@
 const express = require("express")
 const router = express.Router()
 const mysqlConn = require("../../database_conn")
-const axios = require("axios")
 
 const moment = require('moment');
 require('moment-timezone');
 moment.tz.setDefault("Asia/Seoul");
 
-// 특일 정보 데이터 유효 연도(2024-06-07) 이후에는 재 신청하여 사용 필요.
-async function get_holiday(now_time_arr) {
-    let solYear = now_time_arr[0]
-    let solMonth = now_time_arr[1]
-    let ServiceKey = "jfBsg4lK63Nz%2BvKrJd%2F7GPg4cWhMRbHnuANvDhLau2jiR6iOPofuBQ8LaPSGiE5zVSwzki9tGrezxvZEac057A%3D%3D"
-    let _type = "json"
 
-    // 공휴일 데이터 GET
-    return await axios.get(`http://apis.data.go.kr/B090041/openapi/service/SpcdeInfoService/getRestDeInfo?solYear=${solYear}&solMonth=${solMonth}&_type=${_type}&ServiceKey=${ServiceKey}`)
-    .then((res)=> {
-        let result = res.data.response 
-        if(result.header.resultCode != '00') {
-            return null
-        } else {
-            let items = result.body.items.item
-            let holidays = []
-            if (items != undefined) {
-                items.forEach(element=> {
-                    holidays.push(element.locdate)
-                })
-            }
-            return holidays
-        }
-    })
-}
 
 router.get("/list", async(request, response)=> {
     try {
@@ -422,6 +397,7 @@ router.get("/charge_point/list", (request, response)=> {
 
 router.post("/charge_price", async (request, response)=> {
     // console.log(request.body)
+    // console.log(globalThis.holiday)
     mysqlConn.connectionService.query("select purpose from charge_station where station_id = ?", request.body.station_id, async (err, rows)=> {
         if(err) {
             console.error(err)
@@ -516,7 +492,8 @@ async function get_payment_charge_price(public, calc_mv) {
             let power
 
             // 공휴일 GET
-            let date = await get_holiday(now_time_arr)
+            // let date = await get_holiday(now_time_arr)
+            let date = globalThis.holiday
 
             // 비교 할 오늘 날짜
             let compare_date = now_time_arr[0] + now_time_arr[1] + now_time_arr[2]
@@ -637,7 +614,8 @@ async function get_charge_price(public) {
                 let power
     
                 // 공휴일 GET
-                let date = await get_holiday(now_time_arr)
+                // let date = await get_holiday(now_time_arr)
+                let date = globalThis.holiday
     
                 // 비교 할 오늘 날짜
                 let compare_date = now_time_arr[0] + now_time_arr[1] + now_time_arr[2]
