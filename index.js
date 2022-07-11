@@ -78,7 +78,7 @@ mysqlConn.connectionService.on('error', err=> {
             }
                 console.log("[MYSQL] > 'connectionService' Database Conneted")    
         }) 
-    } else throw err;
+    }
 });
 
 mysqlConn.connectionRoming.on('error', err=> {
@@ -91,7 +91,7 @@ mysqlConn.connectionRoming.on('error', err=> {
             }
                 console.log("[MYSQL] > 'Roming_Platform' Database Conneted")    
         }) 
-    } else throw err;
+    }
 });
 
 // setInterval(function () {
